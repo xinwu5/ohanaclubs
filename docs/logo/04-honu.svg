@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5cc4d1"/>
+      <stop offset="100%" stop-color="#0c5a6c"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(100 105)">
+    <!-- Flippers -->
+    <ellipse cx="-58" cy="-22" rx="24" ry="14" fill="#168ea0" transform="rotate(-30 -58 -22)"/>
+    <ellipse cx="58"  cy="-22" rx="24" ry="14" fill="#168ea0" transform="rotate(30 58 -22)"/>
+    <ellipse cx="-46" cy="36"  rx="20" ry="12" fill="#168ea0" transform="rotate(20 -46 36)"/>
+    <ellipse cx="46"  cy="36"  rx="20" ry="12" fill="#168ea0" transform="rotate(-20 46 36)"/>
+    <!-- Tail -->
+    <path d="M-6 50 L 0 70 L 6 50 Z" fill="#168ea0"/>
+    <!-- Head -->
+    <ellipse cx="0" cy="-58" rx="14" ry="11" fill="#168ea0"/>
+    <!-- Shell -->
+    <ellipse cx="0" cy="0" rx="48" ry="44" fill="url(#g4)"/>
+    <!-- Hex pattern in shell -->
+    <g fill="none" stroke="#fff" stroke-width="2" opacity="0.7">
+      <polygon points="0,-22 14,-13 14,5 0,14 -14,5 -14,-13"/>
+      <polygon points="-26,-4 -14,-13 -14,5 -26,14 -38,5 -38,-13" transform="translate(8 0)"/>
+      <polygon points="26,-4  14,-13  14,5  26,14  38,5  38,-13" transform="translate(-8 0)"/>
+    </g>
+  </g>
+</svg>

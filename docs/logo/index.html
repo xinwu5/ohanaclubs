@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logo options &mdash; ohanaclubs</title>
+<meta name="description" content="Eight logo directions for ohanaclubs. Pick a favorite or send feedback.">
+<meta name="theme-color" content="#168ea0">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://ohanaclubs.com/logo/">
+<script>
+  (function () {
+    var h = location.hostname;
+    if (h.endsWith("github.io") || h.endsWith("github.dev")) {
+      location.replace("https://ohanaclubs.com" + location.pathname + location.search + location.hash);
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/assets/theme.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="/">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <defs>
+          <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#5cc4d1"/>
+            <stop offset="100%" stop-color="#0f7286"/>
+          </linearGradient>
+        </defs>
+        <circle cx="16" cy="16" r="14" fill="url(#hg)"/>
+        <path d="M2 20 Q 8 16 14 20 T 26 20 T 38 20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+        <path d="M2 24 Q 8 20 14 24 T 26 24 T 38 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+      </svg>
+      <span>ohana<b>clubs</b></span>
+    </a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/schedule/">Schedule</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <header class="page-head">
+    <p class="kicker">Help us decide</p>
+    <h1>Logo options</h1>
+    <p class="lede">
+      Eight directions for the ohanaclubs mark. Each is shown big at the top, then at three real sizes
+      (header, button, favicon) on light and dark backgrounds, with the wordmark beside it.
+    </p>
+    <p class="share-row">
+      <span>Share this page:</span>
+      <code id="page-url">https://ohanaclubs.com/logo/</code>
+      <button id="copy-url" type="button" class="btn small">Copy link</button>
+    </p>
+  </header>
+
+  <section class="grid" id="grid"></section>
+
+  <section class="vote">
+    <h2>Got a favorite?</h2>
+    <p>No login required &mdash; just remember the design number and tell whoever sent you this link.</p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>&copy; ohanaclubs &middot; Made for Hawaii families</p>
+  </div>
+</footer>
+
+<script>
+  const designs = [
+    { id: "01-wave-disc",      title: "Wave Disc",
+      tag: "Refined version of what's on the site now.",
+      pros: [
+        "<b>Best for app icons.</b> Clean at favicon size and on the home screen.",
+        "Honest brand cue: ocean + Hawaii.",
+        "Boring in a good way &mdash; won't go out of style.",
+      ],
+    },
+    { id: "02-wave-wordmark",  title: "Wave Wordmark",
+      tag: "Pure typography, no icon.",
+      pros: [
+        "<b>Most distinctive in the header.</b> Says the brand name loudly.",
+        "Best paired with Design 1 as the favicon companion.",
+        "Risk: needs a separate icon for tabs and home screen.",
+      ],
+    },
+    { id: "03-hibiscus",       title: "Hibiscus",
+      tag: "Geometric Hawaiian flower.",
+      pros: [
+        "<b>Most overtly Hawaiian.</b> Locals recognize it instantly.",
+        "Five petals could later represent five sports (soccer, basketball, &hellip;).",
+        "Risk: slightly feminine; can read as 'wellness app' rather than youth sports.",
+      ],
+    },
+    { id: "04-honu",           title: "Honu (Sea Turtle)",
+      tag: "Hawaiian symbol of family + longevity.",
+      pros: [
+        "<b>Cultural depth.</b> Honu = ohana in many Hawaiian families.",
+        "Distinctive at any size; reads as 'ohana' even without text.",
+        "Risk: someone may confuse it with an environmental nonprofit.",
+      ],
+    },
+    { id: "05-surfboard-ball", title: "Surfboard + Ball",
+      tag: "Sport meets Hawaii, very literal.",
+      pros: [
+        "<b>Most on-the-nose for the use case.</b> Can't miss the message.",
+        "Locks into 'Hawaii youth sports' forever &mdash; harder to expand later.",
+        "Risk of looking like a clip-art summer camp logo.",
+      ],
+    },
+    { id: "06-ohana-figures",  title: "Three Figures",
+      tag: "Family + wave.",
+      pros: [
+        "<b>Heart on the sleeve.</b> Says 'family' before it says anything else.",
+        "Works on its own; doesn't need 'clubs' explained.",
+        "Risk: can read like a charity / community center.",
+      ],
+    },
+    { id: "07-oc-monogram",    title: "OC Monogram",
+      tag: "Initials with a wave detail.",
+      pros: [
+        "<b>Most minimal.</b> Lots of brands lean monogram (HBO, NB, &hellip;).",
+        "Subtle wave keeps it Hawaiian without shouting.",
+        "Risk: 'OC' to mainlanders means Orange County, California.",
+      ],
+    },
+    { id: "08-diamond-head",   title: "Diamond Head + Wave",
+      tag: "Iconic Oahu silhouette.",
+      pros: [
+        "<b>Place-specific.</b> Says 'Oahu' before any other Hawaiian island.",
+        "Most picturesque / illustrative of the bunch.",
+        "Risk: harder to scale to favicon size, more detail to lose.",
+      ],
+    },
+  ];
+
+  const grid = document.getElementById("grid");
+  designs.forEach((d, idx) => {
+    const num = String(idx + 1).padStart(2, "0");
+    const card = document.createElement("article");
+    card.className = "design";
+    card.id = "design-" + (idx + 1);
+    card.innerHTML = `
+      <header class="design-head">
+        <span class="num">${num}</span>
+        <h2>${d.title}</h2>
+        <p class="tag">${d.tag}</p>
+      </header>
+      <div class="hero-row">
+        <object class="hero-svg" type="image/svg+xml" data="${d.id}.svg" aria-label="${d.title}"></object>
+      </div>
+      <div class="row light">
+        <object class="lg" type="image/svg+xml" data="${d.id}.svg"></object>
+        <object class="md" type="image/svg+xml" data="${d.id}.svg"></object>
+        <object class="sm" type="image/svg+xml" data="${d.id}.svg"></object>
+        <span class="wm"><b>ohana</b>clubs</span>
+      </div>
+      <div class="row dark">
+        <object class="lg" type="image/svg+xml" data="${d.id}.svg"></object>
+        <object class="md" type="image/svg+xml" data="${d.id}.svg"></object>
+        <object class="sm" type="image/svg+xml" data="${d.id}.svg"></object>
+        <span class="wm dark"><b>ohana</b>clubs</span>
+      </div>
+      <ul class="pros">${d.pros.map((p) => `<li>${p}</li>`).join("")}</ul>
+      <p class="anchor"><a href="#design-${idx + 1}">link to design ${idx + 1}</a></p>
+    `;
+    grid.appendChild(card);
+  });
+
+  document.getElementById("copy-url").addEventListener("click", async (e) => {
+    try {
+      await navigator.clipboard.writeText("https://ohanaclubs.com/logo/");
+      const btn = e.currentTarget;
+      const orig = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(() => (btn.textContent = orig), 1200);
+    } catch {}
+  });
+</script>
+
+</body>
+</html>

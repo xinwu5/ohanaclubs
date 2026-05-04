@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g8" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5cc4d1"/>
+      <stop offset="100%" stop-color="#0c5a6c"/>
+    </linearGradient>
+  </defs>
+  <!-- Diamond Head silhouette -->
+  <path d="M0 130 L 60 100 L 100 110 L 140 80 L 200 130 L 200 200 L 0 200 Z"
+        fill="#0c5a6c" opacity="0.85"/>
+  <!-- Sky / sun -->
+  <circle cx="148" cy="58" r="18" fill="#ff7e6b" opacity="0.85"/>
+  <!-- Wave layered in front -->
+  <path d="M0 158 Q 40 140 80 158 T 160 158 T 240 158 L 240 200 L 0 200 Z"
+        fill="url(#g8)" opacity="0.85"/>
+  <path d="M0 178 Q 40 162 80 178 T 160 178 T 240 178 L 240 200 L 0 200 Z"
+        fill="#168ea0"/>
+</svg>

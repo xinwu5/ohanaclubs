@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="g3" cx="0.5" cy="0.5" r="0.6">
+      <stop offset="0%" stop-color="#ff7e6b"/>
+      <stop offset="100%" stop-color="#168ea0"/>
+    </radialGradient>
+  </defs>
+  <!-- 5 petals around the center -->
+  <g transform="translate(100 100)">
+    <g>
+      <ellipse cx="0" cy="-46" rx="22" ry="42" fill="#168ea0" opacity="0.92"/>
+    </g>
+    <g transform="rotate(72)">
+      <ellipse cx="0" cy="-46" rx="22" ry="42" fill="#0f7286" opacity="0.92"/>
+    </g>
+    <g transform="rotate(144)">
+      <ellipse cx="0" cy="-46" rx="22" ry="42" fill="#5cc4d1" opacity="0.92"/>
+    </g>
+    <g transform="rotate(216)">
+      <ellipse cx="0" cy="-46" rx="22" ry="42" fill="#168ea0" opacity="0.92"/>
+    </g>
+    <g transform="rotate(288)">
+      <ellipse cx="0" cy="-46" rx="22" ry="42" fill="#0c5a6c" opacity="0.92"/>
+    </g>
+    <!-- Center stamen -->
+    <circle cx="0" cy="0" r="14" fill="url(#g3)"/>
+    <circle cx="0" cy="0" r="6" fill="#fff5d4"/>
+  </g>
+</svg>
