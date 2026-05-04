@@ -205,7 +205,7 @@ function filterEvents(
 
 interface KitInfo {
   role: "HOME" | "AWAY" | "BOTH";
-  kit: "light" | "dark_blue" | "split";
+  kit: "light" | "dark" | "split";
   label: string;
   short: string;
 }
@@ -220,7 +220,7 @@ function kitInfo(event: Event, selected: Set<string>): KitInfo | null {
     return {
       role: "BOTH",
       kit: "split",
-      label: `BOTH — ${home} wears LIGHT, ${away} wears DARK BLUE`,
+      label: `BOTH — ${home} wears LIGHT, ${away} wears DARK`,
       short: "BOTH",
     };
   }
@@ -234,9 +234,9 @@ function kitInfo(event: Event, selected: Set<string>): KitInfo | null {
   }
   return {
     role: "AWAY",
-    kit: "dark_blue",
-    label: `AWAY (${away}) — wear DARK BLUE`,
-    short: "AWAY / DARK BLUE",
+    kit: "dark",
+    label: `AWAY (${away}) — wear DARK`,
+    short: "AWAY / DARK",
   };
 }
 
@@ -252,8 +252,8 @@ function annotateEvent(event: Event, selected: Set<string>): Event {
   const [home, away] = event.teams;
   let title: string;
   if (info.role === "HOME") title = `${home} (LIGHT) vs ${away}`;
-  else if (info.role === "AWAY") title = `${away} (DARK BLUE) @ ${home}`;
-  else title = `${home} (LIGHT) vs ${away} (DARK BLUE)`;
+  else if (info.role === "AWAY") title = `${away} (DARK) @ ${home}`;
+  else title = `${home} (LIGHT) vs ${away} (DARK)`;
 
   const newLines: string[] = [];
   let depth = 0;

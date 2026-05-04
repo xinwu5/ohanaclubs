@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Schedule &mdash; ohanaclubs</title>
+<meta name="description" content="Subscribe to your kid's Oahu League soccer games. Pick the team(s) you care about and get one auto-updating calendar.">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#168ea0">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ohanaclubs">
+<link rel="canonical" href="https://ohanaclubs.com/schedule/">
+<script>
+  (function () {
+    var h = location.hostname;
+    if (h.endsWith("github.io") || h.endsWith("github.dev")) {
+      location.replace("https://ohanaclubs.com" + location.pathname + location.search + location.hash);
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/assets/theme.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="/">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#5cc4d1"/>
+            <stop offset="100%" stop-color="#0f7286"/>
+          </linearGradient>
+        </defs>
+        <circle cx="16" cy="16" r="14" fill="url(#lg)"/>
+        <path d="M2 20 Q 8 16 14 20 T 26 20 T 38 20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+        <path d="M2 24 Q 8 20 14 24 T 26 24 T 38 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+      </svg>
+      <span>ohana<b>clubs</b></span>
+    </a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="https://github.com/xinwu5/ohanaclubs" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="page-title">
+      <h1>Oahu League Schedule</h1>
+      <span class="badge">Spring 2025/26</span>
+    </div>
+    <p class="page-sub">
+      Pick your team(s) &mdash; subscribe in your calendar app and games stay in sync automatically.
+      <small><b>Kit:</b> the team listed first is HOME and wears LIGHT; AWAY wears DARK (their team color). Data from the <a href="https://ol-spring-25-26.sportsaffinity.com/tour/public/info/accepted_list.asp?tournamentguid=94D44303-F331-4505-92B2-813593B3FC50&amp;show=girls" target="_blank" rel="noopener">official Oahu League site</a>.</small>
+    </p>
+
+    <!-- Search bar (sticky) -->
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search teams (e.g. fc hawaii, leahi, 14g)" autocomplete="off">
+      <button id="clear" type="button" class="ghost">Clear all</button>
+    </div>
+
+    <div id="status" class="status">Loading teams&hellip;</div>
+
+    <!-- Subscribe / share bar (appears when teams selected) -->
+    <div id="selected" class="selected-bar hide">
+      <div class="chips-row">
+        <b>Selected:</b> <span id="chips"></span>
+      </div>
+      <div class="actions">
+        <a id="subscribe" class="btn primary" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>
+          Subscribe
+        </a>
+        <button id="copy" type="button" class="ghost">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy URL
+        </button>
+        <a id="download" class="btn ghost" href="#" download="oahu.ics">Download .ics</a>
+      </div>
+      <div class="url-row">Calendar URL: <span id="url" class="url"></span></div>
+      <details class="help">
+        <summary>How to subscribe (Apple / Google / Outlook)</summary>
+        <ul>
+          <li><b>iPhone &middot; Apple Calendar:</b> tap <i>Subscribe</i> &rarr; Subscribe &rarr; Add. Then Settings &rarr; Calendar &rarr; Accounts &rarr; Subscribed Calendars and set Fetch to <b>Daily</b> (default is weekly).</li>
+          <li><b>Mac &middot; Apple Calendar:</b> click <i>Subscribe</i>; in the dialog, set Auto-refresh to "Every day".</li>
+          <li><b>Android / Google Calendar:</b> tap <i>Copy URL</i>, then on a desktop browser open <a href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener">Google Calendar &rarr; Add by URL</a>, paste, click Add. Calendar then syncs to all your devices.</li>
+          <li><b>Outlook:</b> Add calendar &rarr; Subscribe from web &rarr; paste the URL.</li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- Upcoming games preview (appears once teams selected, near top) -->
+    <section id="preview" class="preview hide" aria-live="polite">
+      <header class="preview-head">
+        <h2>Upcoming games</h2>
+        <button id="preview-refresh" type="button" class="ghost small" title="Refresh">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+          Refresh
+        </button>
+      </header>
+      <div id="preview-body" class="preview-body"></div>
+    </section>
+
+    <!-- Team picker (collapses after first selection) -->
+    <details id="picker-wrap" class="picker-wrap" open>
+      <summary>
+        <span class="picker-title"><b>Choose teams</b> <small id="picker-count"></small></span>
+        <span class="picker-toggle">show</span>
+      </summary>
+      <form id="teamform"></form>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="actions-row">
+      <p>&copy; ohanaclubs &middot; <a href="https://github.com/xinwu5/ohanaclubs" target="_blank" rel="noopener">Source on GitHub</a> &middot; not affiliated with Oahu League / HYSA.</p>
+      <button id="install" class="hide" type="button">Install as app</button>
+    </div>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -230,7 +230,7 @@ def kit_info(event: Event, selected: set[str]) -> dict | None:
     """Given the user's selected teams, figure out role+kit for this game.
 
     Convention from the source feed: the first team in the matchup is HOME,
-    the second is AWAY. Home wears LIGHT; away wears DARK BLUE.
+    the second is AWAY. Home wears LIGHT; away wears DARK.
     Returns None if the event doesn't involve any selected team.
     """
     if not event.teams:
@@ -246,7 +246,7 @@ def kit_info(event: Event, selected: set[str]) -> dict | None:
         return {
             "role": "BOTH",
             "kit": "split",
-            "label": f"BOTH \u2014 {home} wears LIGHT, {away} wears DARK BLUE",
+            "label": f"BOTH \u2014 {home} wears LIGHT, {away} wears DARK",
             "short": "BOTH",
         }
     if is_home:
@@ -258,9 +258,9 @@ def kit_info(event: Event, selected: set[str]) -> dict | None:
         }
     return {
         "role": "AWAY",
-        "kit": "dark_blue",
-        "label": f"AWAY ({away}) \u2014 wear DARK BLUE",
-        "short": "AWAY / DARK BLUE",
+        "kit": "dark",
+        "label": f"AWAY ({away}) \u2014 wear DARK",
+        "short": "AWAY / DARK",
     }
 
 
@@ -290,9 +290,9 @@ def annotate_event(event: Event, selected: set[str]) -> Event:
             if info["role"] == "HOME":
                 title = f"{home} (LIGHT) vs {away}"
             elif info["role"] == "AWAY":
-                title = f"{away} (DARK BLUE) @ {home}"
+                title = f"{away} (DARK) @ {home}"
             else:  # BOTH
-                title = f"{home} (LIGHT) vs {away} (DARK BLUE)"
+                title = f"{home} (LIGHT) vs {away} (DARK)"
             new_lines.append(f"SUMMARY:{title}")
         elif depth == 1 and l.startswith("LOCATION:"):
             new_lines.append("LOCATION:" + _clean_field(l[len("LOCATION:"):]))
@@ -471,14 +471,14 @@ INDEX_HTML = """<!doctype html>
   .kit { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px;
          font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
   .kit-light { background: #fffbe0; color: #6b5800; border: 1px solid #d8c97a; }
-  .kit-dark  { background: #1f3a8a; color: #fff;    border: 1px solid #14276b; }
+  .kit-dark  { background: linear-gradient(135deg,#2a3640,#0e1a22); color: #fff; border: 1px solid #0a141b; }
   .kit-split { background: #efe6ff; color: #4a2a99; border: 1px solid #b69cff; }
 </style>
 </head>
 <body>
   <h1>Oahu League Schedule Filter</h1>
   <div class="sub">Pick one or more teams &mdash; subscribe in your calendar app and it will stay in sync.<br>
-  <small>Kit reminder: <b>HOME</b> (team listed first) wears <b>LIGHT</b>; <b>AWAY</b> wears <b>DARK BLUE</b>.</small></div>
+  <small>Kit reminder: <b>HOME</b> (team listed first) wears <b>LIGHT</b>; <b>AWAY</b> wears <b>DARK</b> (their team color).</small></div>
 
   <div class="controls">
     <input id="search" type="search" placeholder="Filter teams (e.g. leahi, rush, 14g)" autofocus>
@@ -600,7 +600,7 @@ previewBtn.addEventListener('click', async () => {
       const tr = document.createElement('tr');
       let kitHtml = '';
       if (ev.kit === 'light')      kitHtml = '<span class="kit kit-light">HOME &middot; LIGHT</span>';
-      else if (ev.kit === 'dark_blue') kitHtml = '<span class="kit kit-dark">AWAY &middot; DARK BLUE</span>';
+      else if (ev.kit === 'dark') kitHtml = '<span class="kit kit-dark">AWAY &middot; DARK</span>';
       else if (ev.kit === 'split') kitHtml = '<span class="kit kit-split">BOTH (split)</span>';
       tr.innerHTML = `<td>${ev.when_pretty}</td>
                       <td><b>${ev.teams[0]}</b> <i>vs</i> <b>${ev.teams[1]}</b><br><small>${ev.age} ${ev.gender}</small></td>

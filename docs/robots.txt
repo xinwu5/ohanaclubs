@@ -1,0 +1,11 @@
+# https://www.robotstxt.org
+# Welcome, polite crawlers.
+
+User-agent: *
+Allow: /
+
+# Canonical home is https://ohanaclubs.com — GitHub Pages 301-redirects
+# requests from xinwu5.github.io/ohanaclubs/ here automatically. The canonical
+# <link> tag in each page reinforces that for any straggler.
+
+Sitemap: https://ohanaclubs.com/sitemap.xml
