@@ -2,65 +2,314 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Oahu League Schedule Filter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ohanaclubs &mdash; Hawaii youth sports, organized.</title>
+<meta name="description" content="ohanaclubs makes youth sports easier for Hawaii families. Start with smart schedule subscriptions for the Oahu League.">
+<meta name="theme-color" content="#168ea0">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#22aa77">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Oahu Soccer">
-<link rel="stylesheet" href="style.css">
+<meta name="apple-mobile-web-app-title" content="ohanaclubs">
+
+<meta property="og:title" content="ohanaclubs">
+<meta property="og:description" content="Hawaii youth sports, organized. Subscribe to the games that actually matter to your family.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ohanaclubs.com/">
+<meta property="og:image" content="https://ohanaclubs.com/icons/icon-512.png">
+<link rel="canonical" href="https://ohanaclubs.com/">
+<script>
+  // Safety net: if anyone arrives via the github.io URL (stale bookmark,
+  // direct link, etc.), bounce them to the canonical domain. GitHub Pages
+  // already 301-redirects to the custom domain, but this protects against
+  // edge cases (private fork previews, third-party caches, etc.).
+  (function () {
+    var h = location.hostname;
+    if (h.endsWith("github.io") || h.endsWith("github.dev")) {
+      location.replace("https://ohanaclubs.com" + location.pathname + location.search + location.hash);
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="landing.css">
 </head>
 <body>
-<header>
-  <h1>Oahu League Schedule</h1>
-  <p class="sub">Pick one or more teams &mdash; subscribe in your calendar app and games stay in sync automatically.<br>
-  <small>Kit reminder: <b>HOME</b> (team listed first) wears <b>LIGHT</b>; <b>AWAY</b> wears <b>DARK BLUE</b>.</small></p>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="/">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#5cc4d1"/>
+            <stop offset="100%" stop-color="#0f7286"/>
+          </linearGradient>
+        </defs>
+        <circle cx="16" cy="16" r="14" fill="url(#lg)"/>
+        <path d="M2 20 Q 8 16 14 20 T 26 20 T 38 20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+        <path d="M2 24 Q 8 20 14 24 T 26 24 T 38 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+      </svg>
+      <span>ohana<b>clubs</b></span>
+    </a>
+    <nav>
+      <a href="/schedule/">Schedule</a>
+    </nav>
+  </div>
 </header>
 
-<div class="controls">
-  <input id="search" type="search" placeholder="Filter teams (e.g. leahi, rush, 14g)" autofocus>
-  <button id="clear" type="button">Clear all</button>
-</div>
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="kicker">Made on Oahu &middot; for the families that show up</p>
+      <h1>Hawaii youth sports, <em>organized.</em></h1>
+      <p class="lede">
+        Practices, games, fields, kit colors &mdash; all the things parents juggle every weekend.
+        ohanaclubs starts with the one that hurts most: a calendar feed for <strong>only your kid&rsquo;s team</strong>,
+        auto-updating when the league changes things last minute.
+      </p>
+      <div class="hero-cta">
+        <a class="btn primary big" href="/schedule/">Open the schedule
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a class="btn ghost big" href="#how">How it works</a>
+      </div>
+      <p class="hero-meta">Free &middot; iPhone, Android, Mac, Outlook &middot; install as a home-screen app</p>
+    </div>
 
-<div id="status" class="status">Loading teams&hellip;</div>
+    <!-- Illustration: a stylized phone showing a calendar with games -->
+    <div class="hero-art" aria-hidden="true">
+      <div class="art-blob"></div>
+      <svg class="phone" viewBox="0 0 280 560" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="phoneFrame" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0c5a6c"/>
+            <stop offset="100%" stop-color="#06303c"/>
+          </linearGradient>
+          <linearGradient id="screenBg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ecf8fa"/>
+            <stop offset="100%" stop-color="#ffffff"/>
+          </linearGradient>
+        </defs>
 
-<div id="selected" class="selected-bar hide">
-  <div><b>Selected:</b> <span id="chips"></span></div>
-  <div class="actions">
-    <a id="subscribe" class="btn primary" href="#">Subscribe (webcal)</a>
-    <a id="download" class="btn" href="#" download="oahu.ics">Download .ics</a>
-    <button id="copy" type="button">Copy URL</button>
-    <button id="preview-btn" type="button">Show upcoming games</button>
+        <!-- Phone body -->
+        <rect x="0" y="0" width="280" height="560" rx="38" ry="38" fill="url(#phoneFrame)"/>
+        <rect x="6" y="6" width="268" height="548" rx="32" ry="32" fill="#0a2933"/>
+        <rect x="10" y="10" width="260" height="540" rx="28" ry="28" fill="url(#screenBg)"/>
+        <!-- Notch -->
+        <rect x="110" y="14" width="60" height="14" rx="7" ry="7" fill="#0a2933"/>
+
+        <!-- Status bar -->
+        <text x="32" y="48" fill="#0a2933" font-family="Inter, sans-serif" font-size="11" font-weight="600">9:41</text>
+        <circle cx="234" cy="44" r="3" fill="#0a2933"/>
+        <rect x="240" y="40" width="14" height="8" rx="1.5" fill="none" stroke="#0a2933" stroke-width="1.2"/>
+
+        <!-- App header -->
+        <text x="22" y="86" fill="#0a2933" font-family="Playfair Display, serif" font-style="italic" font-size="20" font-weight="700">May 2026</text>
+        <circle cx="248" cy="80" r="14" fill="#168ea0"/>
+        <text x="248" y="85" text-anchor="middle" fill="#fff" font-family="Inter, sans-serif" font-size="12" font-weight="700">+</text>
+
+        <!-- Days of week -->
+        <g font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#4d6770">
+          <text x="32" y="116" text-anchor="middle">S</text>
+          <text x="68" y="116" text-anchor="middle">M</text>
+          <text x="104" y="116" text-anchor="middle">T</text>
+          <text x="140" y="116" text-anchor="middle">W</text>
+          <text x="176" y="116" text-anchor="middle">T</text>
+          <text x="212" y="116" text-anchor="middle">F</text>
+          <text x="248" y="116" text-anchor="middle">S</text>
+        </g>
+
+        <!-- Calendar grid (4 weeks) -->
+        <g font-family="Inter, sans-serif" font-size="11" fill="#0a2933">
+          <!-- week 1 -->
+          <text x="32" y="138" text-anchor="middle">3</text>
+          <text x="68" y="138" text-anchor="middle">4</text>
+          <text x="104" y="138" text-anchor="middle">5</text>
+          <text x="140" y="138" text-anchor="middle">6</text>
+          <text x="176" y="138" text-anchor="middle">7</text>
+          <text x="212" y="138" text-anchor="middle">8</text>
+          <circle cx="248" cy="134" r="11" fill="#168ea0"/>
+          <text x="248" y="138" text-anchor="middle" fill="#fff" font-weight="600">9</text>
+          <!-- week 2 -->
+          <circle cx="32" cy="166" r="11" fill="#ff7e6b" opacity="0.85"/>
+          <text x="32" y="170" text-anchor="middle" fill="#fff" font-weight="600">10</text>
+          <text x="68" y="170" text-anchor="middle">11</text>
+          <text x="104" y="170" text-anchor="middle">12</text>
+          <text x="140" y="170" text-anchor="middle">13</text>
+          <text x="176" y="170" text-anchor="middle">14</text>
+          <text x="212" y="170" text-anchor="middle">15</text>
+          <text x="248" y="170" text-anchor="middle">16</text>
+          <!-- week 3 -->
+          <text x="32" y="202" text-anchor="middle">17</text>
+          <text x="68" y="202" text-anchor="middle">18</text>
+          <text x="104" y="202" text-anchor="middle">19</text>
+          <text x="140" y="202" text-anchor="middle">20</text>
+          <text x="176" y="202" text-anchor="middle">21</text>
+          <text x="212" y="202" text-anchor="middle">22</text>
+          <circle cx="248" cy="198" r="11" fill="#168ea0" opacity="0.7"/>
+          <text x="248" y="202" text-anchor="middle" fill="#fff" font-weight="600">23</text>
+        </g>
+
+        <!-- Upcoming games card -->
+        <g transform="translate(20, 232)">
+          <rect width="240" height="84" rx="14" fill="#168ea0"/>
+          <text x="14" y="22" fill="#c9ecf1" font-family="Inter,sans-serif" font-size="9" font-weight="600" letter-spacing="1.2">SAT &middot; MAY 9 &middot; 9:30 AM</text>
+          <text x="14" y="42" fill="#fff" font-family="Inter,sans-serif" font-size="13" font-weight="600">FC Hawaii 14G</text>
+          <text x="14" y="58" fill="#c9ecf1" font-family="Inter,sans-serif" font-size="11">vs Surf Hawaii Academy</text>
+          <rect x="14" y="64" width="60" height="14" rx="7" fill="#fff5d4"/>
+          <text x="44" y="74" text-anchor="middle" fill="#6b4f00" font-family="Inter,sans-serif" font-size="9" font-weight="700">HOME · LIGHT</text>
+          <text x="84" y="75" fill="#c9ecf1" font-family="Inter,sans-serif" font-size="10">Field 9v9 12A</text>
+        </g>
+
+        <g transform="translate(20, 328)">
+          <rect width="240" height="84" rx="14" fill="#0a2933"/>
+          <text x="14" y="22" fill="#97b3bb" font-family="Inter,sans-serif" font-size="9" font-weight="600" letter-spacing="1.2">SUN &middot; MAY 10 &middot; 1:30 PM</text>
+          <text x="14" y="42" fill="#fff" font-family="Inter,sans-serif" font-size="13" font-weight="600">FC Hawaii 14G</text>
+          <text x="14" y="58" fill="#97b3bb" font-family="Inter,sans-serif" font-size="11">@ Lightning FC</text>
+          <rect x="14" y="64" width="50" height="14" rx="7" fill="#fff" opacity="0.12"/>
+          <text x="39" y="74" text-anchor="middle" fill="#fff" font-family="Inter,sans-serif" font-size="9" font-weight="700">AWAY · DARK</text>
+          <text x="74" y="75" fill="#97b3bb" font-family="Inter,sans-serif" font-size="10">Field 9v9 08A</text>
+        </g>
+
+        <!-- Subscribe button -->
+        <g transform="translate(20, 432)">
+          <rect width="240" height="44" rx="22" fill="#168ea0"/>
+          <text x="120" y="28" text-anchor="middle" fill="#fff" font-family="Inter,sans-serif" font-size="14" font-weight="700">Subscribe to my team</text>
+        </g>
+
+        <!-- Home indicator -->
+        <rect x="100" y="528" width="80" height="4" rx="2" fill="#0a2933"/>
+      </svg>
+    </div>
   </div>
-  <div class="url-row">URL: <span id="url" class="url"></span></div>
-  <details class="help">
-    <summary>How to subscribe</summary>
-    <ul>
-      <li><b>Apple Calendar (iPhone/Mac):</b> tap <i>Subscribe (webcal)</i>; confirm.</li>
-      <li><b>Google Calendar:</b> open <a href="https://calendar.google.com/calendar/r/settings/addbyurl" target="_blank" rel="noopener">Add by URL</a>, paste the URL above, click Add. (Google refreshes ~once a day.)</li>
-      <li><b>Outlook:</b> Add calendar &rarr; Subscribe from web &rarr; paste the URL.</li>
-    </ul>
-  </details>
-</div>
-
-<form id="teamform"></form>
-
-<section id="preview" class="preview hide">
-  <h2>Upcoming games</h2>
-  <table>
-    <thead><tr><th>When</th><th>Match</th><th>Kit</th><th>Field</th></tr></thead>
-    <tbody id="preview-body"></tbody>
-  </table>
+  <svg class="hero-wave" viewBox="0 0 1440 100" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0,50 C240,90 480,10 720,40 C960,70 1200,30 1440,60 L1440,100 L0,100 Z" fill="currentColor"/>
+  </svg>
 </section>
 
-<footer>
-  <p><a href="https://github.com/xinwu5/ohanaclubs" target="_blank" rel="noopener">Source on GitHub</a> &middot; not affiliated with the Oahu League / HYSA.</p>
-  <p><button id="install" class="hide" type="button">Install as app</button></p>
+<section class="features" id="how">
+  <div class="wrap">
+    <h2>Built for parents, not for sysadmins.</h2>
+    <p class="section-lede">Three taps from "what time is the game?" to a calendar that updates itself.</p>
+    <div class="grid">
+
+      <article class="card">
+        <div class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 26c4-2 7-2 11 0s7 2 11 0 7-2 11 0"/>
+            <path d="M8 34c4-2 7-2 11 0s7 2 11 0 7-2 11 0"/>
+            <circle cx="24" cy="14" r="6"/>
+            <path d="M18 14h12"/>
+          </svg>
+        </div>
+        <h3>Pick your team(s)</h3>
+        <p>Got two kids on different teams? Pick both. Coaching a sibling&rsquo;s squad? Add it too. One calendar, every game.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="8" y="10" width="32" height="32" rx="4"/>
+            <path d="M8 18h32M16 6v8M32 6v8"/>
+            <path d="m18 28 4 4 8-8"/>
+          </svg>
+        </div>
+        <h3>Subscribe once</h3>
+        <p>Apple Calendar, Google Calendar, Outlook &mdash; one tap. Updates flow automatically when fields and times change.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 8 8 14v22a4 4 0 0 0 4 4h24a4 4 0 0 0 4-4V14l-6-6"/>
+            <path d="M14 8h20l-4 8h-12z"/>
+            <path d="M22 22h4M20 28h8"/>
+          </svg>
+        </div>
+        <h3>Know the kit at a glance</h3>
+        <p>Every game title shows whether your team is home or away, and which jersey to wear. No more morning panic.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="14" y="6" width="20" height="36" rx="3"/>
+            <path d="M22 10h4M22 36h4"/>
+            <path d="M19 20h10M19 24h10M19 28h6"/>
+          </svg>
+        </div>
+        <h3>Install it like an app</h3>
+        <p>Add to Home Screen on iPhone or Android. Works offline at the field when WiFi is bad.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="how-stripe">
+  <div class="wrap">
+    <ol class="steps">
+      <li>
+        <span class="num">1</span>
+        <h4>Open the schedule</h4>
+        <p>One page, every team in the league.</p>
+      </li>
+      <li>
+        <span class="num">2</span>
+        <h4>Pick your team(s)</h4>
+        <p>Tap to add. Search if you have to scroll.</p>
+      </li>
+      <li>
+        <span class="num">3</span>
+        <h4>Subscribe</h4>
+        <p>One link, every device, forever.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>Ready for Saturday?</h2>
+    <p>Pick your kid&rsquo;s team and subscribe in under a minute.</p>
+    <a class="btn primary big" href="/schedule/">Open the schedule
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<section class="roadmap">
+  <div class="wrap">
+    <h2>What&rsquo;s next</h2>
+    <p class="section-lede">Schedule is just the beginning. Coming when there&rsquo;s real demand &mdash; let us know what you need.</p>
+    <ul class="roadmap-list">
+      <li><b>Roster &amp; contacts.</b> Who&rsquo;s on the team, who to call.</li>
+      <li><b>RSVP &amp; attendance.</b> Tap to say if your kid is coming.</li>
+      <li><b>Snack signup.</b> The dreaded spreadsheet, killed.</li>
+      <li><b>Photos &amp; highlights.</b> Share the good moments.</li>
+    </ul>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>&copy; ohanaclubs &middot; Made for Hawaii families</p>
+    <p class="fine">Not affiliated with Hawaii Youth Soccer Association, Oahu League, or sportsaffinity.com. Schedule data belongs to the league.</p>
+  </div>
 </footer>
 
-<script src="config.js"></script>
-<script src="app.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    });
+  }
+</script>
+
 </body>
 </html>

@@ -1,0 +1,122 @@
+/* Ocean — shared design tokens for ohanaclubs.
+ *
+ * Ocean / teal / wave palette: calm, cool, coastal.
+ * Used by both the landing page and the /schedule app so the two feel
+ * like one product.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Brand */
+  --brand-50:  #ecf8fa;
+  --brand-100: #c9ecf1;
+  --brand-200: #95dae3;
+  --brand-300: #5cc4d1;
+  --brand-400: #2faab9;
+  --brand-500: #168ea0;   /* primary teal */
+  --brand-600: #0f7286;
+  --brand-700: #0c5a6c;
+  --brand-800: #0a4554;
+  --brand-900: #06303c;
+
+  /* Sand & coral accents (for warmth) */
+  --sand-50:  #fbf7ef;
+  --sand-200: #f0e1c2;
+  --sand-400: #d6b97f;
+  --coral:    #ff7e6b;
+  --coral-dark: #e15a47;
+
+  /* Neutrals */
+  --bg:       #f5fbfc;
+  --surface:  #ffffff;
+  --fg:       #0a2933;
+  --fg-muted: #4d6770;
+  --border:   #d4e3e7;
+
+  --shadow-sm: 0 1px 2px rgba(10, 41, 51, 0.06);
+  --shadow-md: 0 4px 14px rgba(10, 41, 51, 0.08);
+  --shadow-lg: 0 12px 32px rgba(10, 41, 51, 0.12);
+
+  --radius-sm: 6px;
+  --radius:    10px;
+  --radius-lg: 16px;
+
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI",
+               "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #04161c;
+    --surface:  #082630;
+    --fg:       #e6f1f3;
+    --fg-muted: #97b3bb;
+    --border:   #133a47;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--fg);
+  background: var(--bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: var(--brand-600); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button, .btn {
+  font: inherit;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: transform 80ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+button:hover, .btn:hover { box-shadow: var(--shadow-sm); }
+button:active, .btn:active { transform: translateY(1px); }
+.btn.primary, button.primary {
+  background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-600) 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+.btn.primary:hover, button.primary:hover {
+  filter: brightness(1.05);
+  box-shadow: var(--shadow-md);
+  text-decoration: none;
+}
+.btn.ghost {
+  background: transparent;
+  border-color: var(--border);
+}
+
+.hide { display: none !important; }
+
+.wave-divider {
+  display: block;
+  width: 100%;
+  height: 64px;
+  color: var(--brand-500);
+}
+@media (prefers-color-scheme: dark) {
+  .wave-divider { color: var(--brand-700); }
+}
