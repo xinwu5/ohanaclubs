@@ -20,7 +20,7 @@ const ICS_URL = (flight: string) =>
 
 const UPSTREAM_TTL = 60 * 15; // 15 min
 const USER_AGENT =
-  "oahu-soccer-schedule/1.0 (+https://github.com/xinwu5/oahu-soccer-schedule)";
+  "oahu-soccer-schedule/1.0 (+https://github.com/xinwu5/ohanaclubs)";
 
 const CORS_HEADERS: Record<string, string> = {
   "access-control-allow-origin": "*",

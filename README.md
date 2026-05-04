@@ -1,114 +1,95 @@
-# oahu-soccer-schedule
+# ohanaclubs
 
-A free, public, parent-friendly way to subscribe to Oahu League soccer games
-&mdash; only the team(s) you care about, automatically updated.
+Free, parent-friendly subscription calendar for Oahu League youth soccer.
+Pick the team(s) you care about, get one URL that auto-updates as the league
+changes fields and times.
 
-The official league site (sportsaffinity.com) only offers an iCal feed for an
-**entire age group** (e.g. all of G12U). Parents can't filter to one team,
-let alone two (e.g. siblings on different teams). This project fixes that.
+**Live:** https://ohanaclubs.com
+
+## What parents see
+
+- A web page (also installable as a PWA on iPhone / Android / desktop) with
+  every team in the league grouped by gender and age, plus a search box.
+- One "Subscribe" button that hands the calendar URL to Apple Calendar,
+  Google Calendar, or Outlook. Once subscribed, games stay in sync
+  automatically.
+- Smart event titles like:
+  - `Leahi 14G East Blue (LIGHT) vs RUSH 14G East`  (home, light kit)
+  - `RUSH 14G Black (DARK BLUE) @ Leahi 14G West Blue`  (away, dark blue kit)
+- Field names cleaned up (`9v9 12A` instead of `Oahu League Fields 9v9 12A`).
 
 ## Architecture
 
 ```
-                                 fetch + parse + filter
-sportsaffinity.com  ───────►  Cloudflare Worker  ───────►  /calendar.ics
-       (source)                  (free tier)              (per parent)
+                                   fetch + parse + filter
+sportsaffinity.com    ─────►   Cloudflare Worker   ─────►  api.ohanaclubs.com
+   (source feeds)              (free tier)                 /calendar.ics
                                        ▲
-                                       │ /teams.json
+                                       │ /teams.json /preview.json
                                        │
-GitHub Pages  ──── docs/index.html ────┘
-   (UI)
+GitHub Pages   ──── docs/ ─────────────┘
+ohanaclubs.com
+   (UI / PWA)
 ```
 
-* **GitHub Pages** hosts a static UI (`docs/`).
-* **Cloudflare Worker** (`worker/`) does the live fetch + filter and serves
-  the per-team `.ics` URL parents subscribe to.
-* **Auto-refresh**: when the league changes a field or time, the Worker
-  picks it up within 15 minutes; calendar apps then sync per their own
-  refresh interval (Apple: configurable; Google: ~24h; Outlook: ~3h).
-
-## One-time setup
-
-You need:
-* A free [Cloudflare](https://dash.cloudflare.com/sign-up) account.
-* Node 18+ and `npm`.
-* A GitHub repo with Pages enabled (Settings &rarr; Pages &rarr; serve from
-  `main` branch, `/docs` folder).
-
-### 1. Deploy the Worker
-
-```bash
-cd worker
-npm install
-npx wrangler login          # opens browser, one-time
-npx wrangler deploy
-```
-
-Copy the URL it prints, e.g.
-`https://oahu-soccer-schedule.YOUR-SUBDOMAIN.workers.dev`.
-
-### 2. Point the UI at the Worker
-
-Edit `docs/config.js` and paste the URL:
-
-```js
-window.WORKER_URL = "https://oahu-soccer-schedule.YOUR-SUBDOMAIN.workers.dev";
-```
-
-Commit and push. GitHub Pages will publish the UI within a minute.
-
-### 3. Share the page
-
-Send `https://YOUR-USERNAME.github.io/oahu-soccer-schedule/` to your team.
+* `docs/`     static UI (HTML + CSS + JS), served from GitHub Pages on
+              `ohanaclubs.com`. Includes a service worker for offline use
+              and PWA manifest for "Add to Home Screen".
+* `worker/`   Cloudflare Worker on `api.ohanaclubs.com`. Fetches every
+              age-group iCal feed, parses events, and serves
+              `/teams.json`, `/preview.json`, and a filtered
+              `/calendar.ics?team=...&team=...`. Caches upstream data for
+              15 minutes.
+* `oahu_cal.py`  standalone Python version. Same logic, runs as a CLI or a
+              local web UI &mdash; useful for quick experiments without
+              deploying anything.
 
 ## Local development
 
-Run the Worker locally:
-
 ```bash
+# 1. Worker
 cd worker
-npx wrangler dev --port 8787
+npm install
+npx wrangler dev --port 8787      # serves at http://localhost:8787
+
+# 2. UI (point docs/config.js at http://localhost:8787 temporarily)
+cd ../docs
+python3 -m http.server 8000        # http://localhost:8000
+
+# Or skip the Worker entirely and use the all-in-one Python script:
+python3 oahu_cal.py serve --port 8000
 ```
 
-Run the UI locally (point `docs/config.js` at `http://localhost:8787`
-temporarily):
+## Deploying changes
 
 ```bash
-cd docs
-python3 -m http.server 8000
+# Worker
+cd worker && npx wrangler deploy
+
+# UI: just push to main; GitHub Pages redeploys in ~30 seconds.
+git push
 ```
 
-Open http://localhost:8000/.
+When you change the static shell (HTML/CSS/JS), bump `CACHE_VERSION` in
+`docs/sw.js` so installed PWAs pick up the new files.
 
-There's also a **standalone Python version** (`oahu_cal.py`) that does
-everything in one file (CLI + local web UI), useful for quick experiments
-without deploying anything. See `python3 oahu_cal.py --help`.
+## Tournament / season rollover
 
-## What parents get
+The current season's tournament GUID is hardcoded in:
 
-* Pick one or many teams via checkboxes &mdash; with search and grouping by
-  age/gender.
-* A subscription URL they paste once into Apple Calendar, Google Calendar,
-  or Outlook. Updates flow automatically.
-* Calendar event titles are rewritten to be useful at a glance:
-  * Home: `Leahi 14G East Blue (LIGHT) vs RUSH 14G East`
-  * Away: `RUSH 14G Black (DARK BLUE) @ Leahi 14G West Blue`
-  * Both your teams playing: `Team1 (LIGHT) vs Team2 (DARK BLUE)`
-* Field names cleaned up (`9v9 12A` instead of `Oahu League Fields 9v9 12A`).
-* Upcoming games preview directly in the page.
+* `worker/src/index.ts` &rarr; `TOURNAMENT_GUID`, `BASE`
+* `oahu_cal.py`         &rarr; `TOURNAMENT_GUID`, `BASE`
 
-## Tournament / season
-
-The current season's tournament GUID is hardcoded in
-`worker/src/index.ts` and `oahu_cal.py` (look for `TOURNAMENT_GUID` and
-`BASE`). Update both for a new season.
+Update both when a new season starts on sportsaffinity.com, then redeploy
+the Worker.
 
 ## Costs
 
-* GitHub Pages: free (public repo).
-* Cloudflare Workers: free tier covers 100,000 requests/day. With ~200
-  parents subscribed and calendar apps polling every few hours, real
-  traffic is well under 1,000/day. No card on file required.
+| Service              | Plan       | Usage today | Limit       |
+|----------------------|------------|-------------|-------------|
+| Cloudflare Workers   | Free       | < 1k req/d  | 100k req/d  |
+| GitHub Pages         | Free       | static      | 100 GB/mo   |
+| `ohanaclubs.com`     | Registrar  | $10-ish/yr  | -           |
 
 ## License
 
@@ -116,5 +97,5 @@ MIT. See `LICENSE`.
 
 ## Disclaimer
 
-Not affiliated with the Oahu League, HYSA, or sportsaffinity.com. Source
-data belongs to the league; this is just a convenience filter for parents.
+Not affiliated with the Oahu League, HYSA, or sportsaffinity.com. Schedule
+data belongs to the league; this is a convenience filter for parents.
