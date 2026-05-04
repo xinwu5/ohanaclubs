@@ -47,7 +47,7 @@
       <span>ohana<b>clubs</b></span>
     </a>
     <nav>
-      <a href="/">Home</a>
+      <a href="/schedule/">Schedule</a>
       <a href="/map/">Map</a>
     </nav>
   </div>
@@ -72,32 +72,37 @@
 
     <div id="status" class="status">Loading teams&hellip;</div>
 
-    <!-- Subscribe / share bar (appears when teams selected) -->
-    <div id="selected" class="selected-bar hide">
-      <div class="chips-row">
-        <b>Selected:</b> <span id="chips"></span>
-      </div>
-      <div class="actions">
+    <!-- Compact subscribe bar (one line by default; details inside <details>) -->
+    <div id="selected" class="subscribe-bar hide">
+      <div class="sb-main">
+        <div class="sb-info">
+          <span id="sb-badge" class="sb-badge hide" title="You've subscribed">&check;</span>
+          <span class="sb-label"><b id="sb-count">0 teams</b><span class="sb-meta" id="chips"></span></span>
+        </div>
         <a id="subscribe" class="btn primary" href="#">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>
           Subscribe
         </a>
-        <button id="copy" type="button" class="ghost">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy URL
-        </button>
-        <a id="download" class="btn ghost" href="#" download="oahu.ics">Download .ics</a>
+        <details class="sb-more">
+          <summary aria-label="More subscribe options">&hellip;</summary>
+          <div class="sb-more-panel">
+            <div class="sb-actions">
+              <button id="copy" type="button" class="ghost">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy URL
+              </button>
+              <a id="download" class="btn ghost" href="#" download="oahu.ics">Download .ics</a>
+            </div>
+            <div class="url-row">Calendar URL: <span id="url" class="url"></span></div>
+            <ul class="sb-help">
+              <li><b>iPhone &middot; Apple Calendar:</b> tap <i>Subscribe</i> &rarr; Subscribe &rarr; Add. Set Fetch to <b>Daily</b> (default is weekly) in Settings &rarr; Calendar &rarr; Accounts &rarr; Subscribed Calendars.</li>
+              <li><b>Mac &middot; Apple Calendar:</b> click <i>Subscribe</i>; in the dialog set Auto-refresh to "Every day".</li>
+              <li><b>Android / Google Calendar:</b> tap <i>Copy URL</i>, then on a desktop browser open <a href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener">Google Calendar &rarr; Add by URL</a>, paste, click Add.</li>
+              <li><b>Outlook:</b> Add calendar &rarr; Subscribe from web &rarr; paste the URL.</li>
+            </ul>
+          </div>
+        </details>
       </div>
-      <div class="url-row">Calendar URL: <span id="url" class="url"></span></div>
-      <details class="help">
-        <summary>How to subscribe (Apple / Google / Outlook)</summary>
-        <ul>
-          <li><b>iPhone &middot; Apple Calendar:</b> tap <i>Subscribe</i> &rarr; Subscribe &rarr; Add. Then Settings &rarr; Calendar &rarr; Accounts &rarr; Subscribed Calendars and set Fetch to <b>Daily</b> (default is weekly).</li>
-          <li><b>Mac &middot; Apple Calendar:</b> click <i>Subscribe</i>; in the dialog, set Auto-refresh to "Every day".</li>
-          <li><b>Android / Google Calendar:</b> tap <i>Copy URL</i>, then on a desktop browser open <a href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener">Google Calendar &rarr; Add by URL</a>, paste, click Add. Calendar then syncs to all your devices.</li>
-          <li><b>Outlook:</b> Add calendar &rarr; Subscribe from web &rarr; paste the URL.</li>
-        </ul>
-      </details>
     </div>
 
     <!-- Upcoming games preview (appears once teams selected, near top) -->

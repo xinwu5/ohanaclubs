@@ -78,26 +78,81 @@ input[type=search]:focus { outline: 2px solid var(--brand-300); outline-offset: 
 
 .status { color: var(--fg-muted); margin: 1.5rem 0; }
 
-/* ---- Selected / share bar ---- */
-.selected-bar {
-  background: linear-gradient(180deg, var(--brand-50) 0%, var(--surface) 100%);
+/* ---- Compact subscribe bar (replaces the old .selected-bar) ---- */
+.subscribe-bar {
+  background: var(--surface);
   border: 1px solid var(--brand-200);
-  border-radius: var(--radius-lg);
-  padding: 1rem 1.1rem;
-  margin: 0 0 1.2rem;
+  border-radius: 999px;
+  padding: 0.5rem 0.6rem 0.5rem 1rem;
+  margin: 0 0 1rem;
   box-shadow: var(--shadow-sm);
 }
 @media (prefers-color-scheme: dark) {
-  .selected-bar {
-    background: linear-gradient(180deg, var(--brand-800) 0%, var(--surface) 100%);
-    border-color: var(--brand-700);
-  }
+  .subscribe-bar { border-color: var(--brand-700); }
 }
-.chips-row { font-size: 0.95rem; }
-.chips-row b { margin-right: 0.4rem; }
-.actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.6rem; }
-.btn { min-height: 40px; }
-.url-row { word-break: break-all; font-size: 0.82rem; color: var(--fg-muted); margin-top: 0.6rem; }
+.sb-main {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: nowrap;
+}
+.sb-info {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.sb-label {
+  display: flex; align-items: baseline; gap: 0.4rem;
+  min-width: 0; flex: 1;
+}
+.sb-label b { font-weight: 600; white-space: nowrap; }
+.sb-meta {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  min-width: 0;
+}
+.sb-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  background: var(--brand-500); color: #fff;
+  border-radius: 999px; font-weight: 700; font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.subscribe-bar .btn { min-height: 38px; padding: 0.4rem 0.9rem; flex-shrink: 0; }
+
+/* The "more" disclosure: a 3-dot button that opens an expandable panel
+   below the row. */
+.sb-more { position: relative; flex-shrink: 0; }
+.sb-more > summary {
+  list-style: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--fg-muted);
+  font-size: 1.1rem; font-weight: 700; line-height: 1;
+  padding-bottom: 4px;
+  border: 1px solid var(--border);
+}
+.sb-more > summary::-webkit-details-marker { display: none; }
+.sb-more > summary:hover { color: var(--brand-600); }
+.sb-more[open] > summary { background: var(--brand-100); color: var(--brand-700); }
+@media (prefers-color-scheme: dark) {
+  .sb-more[open] > summary { background: var(--brand-800); color: var(--brand-200); }
+}
+
+.sb-more-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: min(360px, calc(100vw - 2rem));
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  box-shadow: var(--shadow-md);
+  z-index: 20;
+}
+.sb-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+.url-row { word-break: break-all; font-size: 0.82rem; color: var(--fg-muted); margin: 0.5rem 0; }
 .url {
   display: inline-block;
   font-family: var(--font-mono); font-size: 0.78rem;
@@ -108,33 +163,20 @@ input[type=search]:focus { outline: 2px solid var(--brand-300); outline-offset: 
   color: var(--fg);
   word-break: break-all;
 }
-.help { margin-top: 0.7rem; }
-.help summary { cursor: pointer; color: var(--brand-700); font-weight: 600; font-size: 0.9rem; }
-.help summary:hover { color: var(--brand-500); }
-.help ul { margin: 0.5rem 0 0; padding-left: 1.2rem; font-size: 0.92rem; color: var(--fg-muted); }
-.help li + li { margin-top: 0.3rem; }
-.help li b { color: var(--fg); }
+.sb-help {
+  margin: 0.6rem 0 0; padding-left: 1.1rem; font-size: 0.85rem; color: var(--fg-muted);
+}
+.sb-help li + li { margin-top: 0.3rem; }
+.sb-help li b { color: var(--fg); }
 
-/* Selected chips */
-.chip {
-  display: inline-flex; align-items: center; gap: 0.3rem;
-  background: var(--brand-100);
-  color: var(--brand-800);
-  padding: 0.22rem 0.6rem;
-  border-radius: 999px;
-  margin: 0.2rem 0.25rem 0 0;
-  font-size: 0.88rem;
-  font-weight: 500;
+/* Chips inside the compact bar render inline as muted text, not pills. */
+#chips { display: inline; }
+#chips .chip {
+  display: inline; background: none; padding: 0; margin: 0;
+  font-size: inherit; font-weight: 400; color: inherit; border-radius: 0;
 }
-@media (prefers-color-scheme: dark) {
-  .chip { background: var(--brand-700); color: var(--brand-100); }
-}
-.chip button {
-  background: transparent; border: none; padding: 0; margin: 0;
-  color: inherit; cursor: pointer; font-size: 1.1rem; line-height: 1;
-  opacity: 0.7; min-height: auto;
-}
-.chip button:hover { opacity: 1; box-shadow: none; background: transparent; }
+#chips .chip + .chip::before { content: ", "; }
+#chips .chip button { display: none; }     /* no remove buttons in the compact bar */
 
 /* ---- Preview ---- */
 .preview {

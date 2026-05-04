@@ -8,6 +8,8 @@ const status     = $("status");
 const form       = $("teamform");
 const selected   = $("selected");
 const chips      = $("chips");
+const sbCount    = $("sb-count");
+const sbBadge    = $("sb-badge");
 const subscribe  = $("subscribe");
 const download   = $("download");
 const copyBtn    = $("copy");
@@ -19,6 +21,8 @@ const clearBtn   = $("clear");
 const search     = $("search");
 const picker     = $("picker-wrap");
 const pickerCount= $("picker-count");
+
+const SUBSCRIBED_KEY = "ohanaclubs.schedule.subscribed.v1";
 
 if (!WORKER || WORKER.includes("YOUR-SUBDOMAIN")) {
   status.textContent =
@@ -82,27 +86,16 @@ function debounce(fn, ms) {
 
 function renderChips(teams) {
   chips.innerHTML = "";
+  if (!teams.length) return;
+  // Compact bar: chips render as inline plain text (e.g. "FC Hawaii 14B Blue, Leahi 14G East Blue")
+  const fragment = document.createDocumentFragment();
   teams.forEach((t) => {
     const span = document.createElement("span");
     span.className = "chip";
-    span.textContent = t;
-    const x = document.createElement("button");
-    x.type = "button";
-    x.textContent = "\u00d7";
-    x.title = "remove";
-    x.setAttribute("aria-label", `Remove ${t}`);
-    x.onclick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const cb = form.querySelector(`input[value="${CSS.escape(t)}"]`);
-      if (cb) {
-        cb.checked = false;
-        onSelectionChanged();
-      }
-    };
-    span.appendChild(x);
-    chips.appendChild(span);
+    span.textContent = " " + t;
+    fragment.appendChild(span);
   });
+  chips.appendChild(fragment);
 }
 
 function updatePickerCount() {
@@ -233,6 +226,15 @@ function onSelectionChanged() {
   selected.classList.remove("hide");
   renderChips(teams);
 
+  // Update the compact label: "1 team" / "2 teams" + comma-separated names
+  if (sbCount) {
+    sbCount.textContent = teams.length === 1 ? "1 team" : `${teams.length} teams`;
+  }
+  if (sbBadge) {
+    const isSubscribed = localStorage.getItem(SUBSCRIBED_KEY) === "1";
+    sbBadge.classList.toggle("hide", !isSubscribed);
+  }
+
   const httpUrl = calendarUrl("https:");
   subscribe.href = calendarUrl("webcal:");
   download.href = httpUrl;
@@ -245,6 +247,16 @@ function onSelectionChanged() {
 // ---------- Wire up events -----------------------------------------------
 
 form.addEventListener("change", onSelectionChanged);
+
+// When user clicks Subscribe, mark "subscribed" so the green check shows
+// on subsequent visits. False positives are fine — the badge is reassurance,
+// not a guarantee.
+if (subscribe) {
+  subscribe.addEventListener("click", () => {
+    try { localStorage.setItem(SUBSCRIBED_KEY, "1"); } catch {}
+    if (sbBadge) sbBadge.classList.remove("hide");
+  });
+}
 
 clearBtn.addEventListener("click", (e) => {
   e.preventDefault();
