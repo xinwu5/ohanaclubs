@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oahu League Schedule Filter</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Oahu League Schedule</h1>
+  <p class="sub">Pick one or more teams &mdash; subscribe in your calendar app and games stay in sync automatically.<br>
+  <small>Kit reminder: <b>HOME</b> (team listed first) wears <b>LIGHT</b>; <b>AWAY</b> wears <b>DARK BLUE</b>.</small></p>
+</header>
+
+<div class="controls">
+  <input id="search" type="search" placeholder="Filter teams (e.g. leahi, rush, 14g)" autofocus>
+  <button id="clear" type="button">Clear all</button>
+</div>
+
+<div id="status" class="status">Loading teams&hellip;</div>
+
+<div id="selected" class="selected-bar hide">
+  <div><b>Selected:</b> <span id="chips"></span></div>
+  <div class="actions">
+    <a id="subscribe" class="btn primary" href="#">Subscribe (webcal)</a>
+    <a id="download" class="btn" href="#" download="oahu.ics">Download .ics</a>
+    <button id="copy" type="button">Copy URL</button>
+    <button id="preview-btn" type="button">Show upcoming games</button>
+  </div>
+  <div class="url-row">URL: <span id="url" class="url"></span></div>
+  <details class="help">
+    <summary>How to subscribe</summary>
+    <ul>
+      <li><b>Apple Calendar (iPhone/Mac):</b> tap <i>Subscribe (webcal)</i>; confirm.</li>
+      <li><b>Google Calendar:</b> open <a href="https://calendar.google.com/calendar/r/settings/addbyurl" target="_blank" rel="noopener">Add by URL</a>, paste the URL above, click Add. (Google refreshes ~once a day.)</li>
+      <li><b>Outlook:</b> Add calendar &rarr; Subscribe from web &rarr; paste the URL.</li>
+    </ul>
+  </details>
+</div>
+
+<form id="teamform"></form>
+
+<section id="preview" class="preview hide">
+  <h2>Upcoming games</h2>
+  <table>
+    <thead><tr><th>When</th><th>Match</th><th>Kit</th><th>Field</th></tr></thead>
+    <tbody id="preview-body"></tbody>
+  </table>
+</section>
+
+<footer>
+  <p><a href="https://github.com/xinwu5/oahu-soccer-schedule" target="_blank" rel="noopener">Source on GitHub</a> &middot; not affiliated with the Oahu League / HYSA.</p>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
