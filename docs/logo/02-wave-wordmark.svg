@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160" font-family="Playfair Display, Georgia, serif">
+  <defs>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#168ea0"/>
+      <stop offset="100%" stop-color="#5cc4d1"/>
+    </linearGradient>
+  </defs>
+  <text x="20" y="92" font-size="78" font-weight="700" font-style="italic" fill="#0a2933">ohana</text>
+  <text x="252" y="92" font-size="78" font-weight="400" fill="#168ea0">clubs</text>
+  <path d="M22 116 Q 80 100 138 116 T 254 116 T 370 116 T 460 116"
+        fill="none" stroke="url(#g2)" stroke-width="6" stroke-linecap="round"/>
+</svg>

@@ -225,6 +225,20 @@ input[type=search]:focus { outline: 2px solid var(--brand-300); outline-offset: 
 .game-meta .dot { opacity: 0.5; }
 .game-meta .age { text-transform: capitalize; }
 
+.game-actions { margin-top: 0.4rem; }
+.map-link {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.82rem; font-weight: 500;
+  color: var(--brand-600);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: background 100ms ease;
+}
+.map-link:hover { background: var(--brand-50); text-decoration: none; }
+@media (prefers-color-scheme: dark) {
+  .map-link:hover { background: var(--brand-800); }
+}
+
 @media (max-width: 520px) {
   .game {
     grid-template-columns: 1fr;

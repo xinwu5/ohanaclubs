@@ -167,6 +167,15 @@ function renderPreview(data) {
       else if (ev.kit === "split")  { kitClass = "kit-split"; kitText = "BOTH"; }
 
       const time = (ev.when_pretty.split(",")[2] || "").trim();
+      const ymd = ev.when && ev.when.length >= 8
+        ? `${ev.when.slice(0,4)}-${ev.when.slice(4,6)}-${ev.when.slice(6,8)}`
+        : "";
+      const fieldLabel = parseFieldLabel(ev.location);
+      const mapHref = ymd
+        ? `/map/?date=${encodeURIComponent(ymd)}` +
+          (fieldLabel ? `&highlight=${encodeURIComponent(fieldLabel)}` : "")
+        : "/map/";
+
       parts.push(`
         <article class="game">
           <div class="game-time">${escapeHtml(time || ev.when_pretty)}</div>
@@ -183,12 +192,26 @@ function renderPreview(data) {
               <span class="dot">·</span>
               <span class="age">${escapeHtml(ev.age)} ${escapeHtml(ev.gender)}</span>
             </div>
+            <div class="game-actions">
+              <a class="map-link" href="${mapHref}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                See on map
+              </a>
+            </div>
           </div>
         </article>`);
     }
     parts.push(`</div>`);
   }
   previewBody.innerHTML = parts.join("");
+}
+
+// Mirrors the parser used in /map/. Returns "17A" / "12" / "" if not parseable.
+function parseFieldLabel(loc) {
+  if (!loc) return "";
+  const m = String(loc).trim().match(/(\d{1,2})([A-Z]?)\s*$/);
+  if (!m) return "";
+  return m[1].replace(/^0+/, "") + (m[2] || "");
 }
 
 // ---------- Selection-changed master handler ------------------------------

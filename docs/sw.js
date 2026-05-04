@@ -8,7 +8,7 @@
  * Bump CACHE_VERSION whenever the static shell changes.
  */
 
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
 
@@ -26,6 +26,11 @@ const STATIC_ASSETS = [
   "/schedule/style.css",
   "/schedule/app.js",
   "/schedule/config.js",
+  "/map/",
+  "/map/index.html",
+  "/map/style.css",
+  "/map/app.js",
+  "/map/waipio.svg",
 ];
 
 self.addEventListener("install", (event) => {

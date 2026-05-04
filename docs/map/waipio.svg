@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 760" font-family="Inter, system-ui, sans-serif">
+  <!-- Waipio Peninsula Soccer Park, simplified.
+       Field rectangles preserved with their published numbers; parking,
+       restrooms, walkways minimized. Each <rect data-field="N"> is named
+       so the JS overlay can target it. North is roughly up. -->
+
+  <title>Waipio Peninsula Soccer Park</title>
+
+  <defs>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7dc77d"/>
+      <stop offset="100%" stop-color="#5cad5c"/>
+    </linearGradient>
+    <linearGradient id="grass-active" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#168ea0"/>
+      <stop offset="100%" stop-color="#0c5a6c"/>
+    </linearGradient>
+    <linearGradient id="grass-mine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff9b8a"/>
+      <stop offset="100%" stop-color="#e15a47"/>
+    </linearGradient>
+    <pattern id="paved" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#e7e3da"/>
+      <path d="M0 8 L8 0" stroke="#d4cdba" stroke-width="0.6"/>
+    </pattern>
+  </defs>
+
+  <style>
+    .field      { fill: url(#grass); stroke: #ffffff; stroke-width: 2.5; cursor: pointer; transition: filter 120ms ease; }
+    .field:hover { filter: brightness(1.08); }
+    .field-num  { font-size: 26px; font-weight: 700; fill: #2a3a2a; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+    .field.active   { fill: url(#grass-active); }
+    .field.mine     { fill: url(#grass-mine); }
+    .stadium    { fill: #c9c2b1; stroke: #a39c87; stroke-width: 2; }
+    .stadium-label { font-size: 11px; font-weight: 600; fill: #4d4636; text-anchor: middle; dominant-baseline: central; letter-spacing: 0.05em; pointer-events: none; }
+    .park-label { font-size: 22px; font-weight: 700; fill: #2a3a2a; letter-spacing: 0.04em; }
+    .compass    { font-size: 12px; font-weight: 700; fill: #6b7066; text-anchor: middle; }
+    .parking    { fill: #b8a98a; opacity: 0.9; }
+    .parking-label { font-size: 13px; font-weight: 700; fill: #4a4030; text-anchor: middle; dominant-baseline: central; letter-spacing: 0.12em; pointer-events: none; }
+  </style>
+
+  <text x="40" y="60" class="park-label">WAIPIO PENINSULA SOCCER PARK</text>
+
+  <g transform="translate(940 60)">
+    <circle r="22" fill="#fff" stroke="#9aa399" stroke-width="1.5"/>
+    <path d="M0 -16 L 6 6 L 0 0 L -6 6 Z" fill="#168ea0"/>
+    <text y="-26" class="compass">N</text>
+  </g>
+
+  <!-- Top cluster: 11v11 fields 15–22 -->
+  <rect class="field" data-field="16" x="420" y="105" width="135" height="95" rx="3"/>
+  <text class="field-num" x="487" y="152">16</text>
+  <rect class="field" data-field="18" x="565" y="105" width="135" height="95" rx="3"/>
+  <text class="field-num" x="632" y="152">18</text>
+  <rect class="field" data-field="20" x="710" y="105" width="135" height="95" rx="3"/>
+  <text class="field-num" x="777" y="152">20</text>
+  <rect class="field" data-field="22" x="855" y="105" width="135" height="95" rx="3"/>
+  <text class="field-num" x="922" y="152">22</text>
+
+  <rect class="field" data-field="15" x="420" y="210" width="135" height="95" rx="3"/>
+  <text class="field-num" x="487" y="257">15</text>
+  <rect class="field" data-field="17" x="565" y="210" width="135" height="95" rx="3"/>
+  <text class="field-num" x="632" y="257">17</text>
+  <rect class="field" data-field="19" x="710" y="210" width="135" height="95" rx="3"/>
+  <text class="field-num" x="777" y="257">19</text>
+  <rect class="field" data-field="21" x="855" y="210" width="135" height="95" rx="3"/>
+  <text class="field-num" x="922" y="257">21</text>
+
+  <rect x="370" y="320" width="0" height="0" fill="none"/>
+
+  <!-- Middle-left: 6, 7, 8 -->
+  <rect class="field" data-field="8" x="225" y="245" width="125" height="95" rx="3"/>
+  <text class="field-num" x="287" y="292">8</text>
+  <rect class="field" data-field="6" x="105" y="355" width="125" height="115" rx="3"/>
+  <text class="field-num" x="167" y="413">6</text>
+  <rect class="field" data-field="7" x="240" y="355" width="125" height="115" rx="3"/>
+  <text class="field-num" x="302" y="413">7</text>
+
+  <!-- Middle cluster: 9–14 -->
+  <rect class="field" data-field="10" x="445" y="355" width="125" height="115" rx="3"/>
+  <text class="field-num" x="507" y="412">10</text>
+  <rect class="field" data-field="12" x="585" y="355" width="125" height="115" rx="3"/>
+  <text class="field-num" x="647" y="412">12</text>
+  <rect class="field" data-field="14" x="725" y="355" width="125" height="115" rx="3"/>
+  <text class="field-num" x="787" y="412">14</text>
+
+  <rect class="field" data-field="9"  x="445" y="480" width="125" height="115" rx="3"/>
+  <text class="field-num" x="507" y="537">9</text>
+  <rect class="field" data-field="11" x="585" y="480" width="125" height="115" rx="3"/>
+  <text class="field-num" x="647" y="537">11</text>
+  <rect class="field" data-field="13" x="725" y="480" width="125" height="115" rx="3"/>
+  <text class="field-num" x="787" y="537">13</text>
+
+  <!-- Field 5 -->
+  <rect class="field" data-field="5" x="240" y="490" width="170" height="105" rx="3"/>
+  <text class="field-num" x="325" y="542">5</text>
+
+  <!-- Stadium -->
+  <rect class="stadium" x="60" y="525" width="135" height="100" rx="6"/>
+  <text x="127" y="575" class="stadium-label">SOCCER STADIUM</text>
+
+  <rect x="220" y="615" width="0" height="0" fill="none"/>
+
+  <!-- Bottom: 2, 4 -->
+  <rect class="field" data-field="2" x="445" y="650" width="125" height="90" rx="3"/>
+  <text class="field-num" x="507" y="695">2</text>
+  <rect class="field" data-field="4" x="585" y="650" width="125" height="90" rx="3"/>
+  <text class="field-num" x="647" y="695">4</text>
+
+  <!-- Parking strips (thin horizontal lanes between field rows) -->
+
+  <!-- Between field 7 and field 5 (left cluster) -->
+  <rect class="parking" x="105" y="475" width="305" height="14" rx="3"/>
+  <text class="parking-label" x="257" y="483">PARKING</text>
+
+  <!-- Between fields 15 and 10 (replaces the old walkway divider) -->
+  <rect class="parking" x="420" y="320" width="570" height="14" rx="3"/>
+  <text class="parking-label" x="705" y="328">PARKING</text>
+
+  <!-- Between fields 9 and 2 (replaces the old walkway divider) -->
+  <rect class="parking" x="220" y="615" width="770" height="14" rx="3"/>
+  <text class="parking-label" x="605" y="623">PARKING</text>
+</svg>
