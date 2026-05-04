@@ -16,3 +16,9 @@ venv/
 # Local artifacts
 *.ics
 !sample.ics
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
