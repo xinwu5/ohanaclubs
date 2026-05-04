@@ -2,5 +2,12 @@ name = "oahu-soccer-schedule"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
+# Custom domain binding: declared here so every `wrangler deploy` re-asserts
+# the route. Avoids the silent 404s we kept hitting when the dashboard-only
+# binding drifted.
+routes = [
+  { pattern = "api.ohanaclubs.com", custom_domain = true },
+]
+
 [observability]
 enabled = true
