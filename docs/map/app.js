@@ -98,16 +98,40 @@ async function loadAllGames() {
     return;
   }
   try {
-    // No team= params → returns everything upcoming.
     const r = await fetch(WORKER + "/preview.json");
     if (!r.ok) throw new Error("HTTP " + r.status);
-    allGames = await r.json();
+    const payload = await r.json();
+    // New shape: { events, warnings }. Old shape was a bare array.
+    allGames = Array.isArray(payload) ? payload : (payload.events || []);
+    const warnings = Array.isArray(payload) ? [] : (payload.warnings || []);
     statusEl.classList.add("hide");
+    showWarnings(warnings);
     render();
   } catch (e) {
     statusEl.textContent = "Couldn't load games: " + e.message;
     statusEl.style.color = "var(--coral-dark, #c00)";
   }
+}
+
+function showWarnings(warnings) {
+  let banner = document.getElementById("warnings-banner");
+  if (!warnings || !warnings.length) {
+    if (banner) banner.remove();
+    return;
+  }
+  if (!banner) {
+    banner = document.createElement("div");
+    banner.id = "warnings-banner";
+    banner.className = "warnings-banner";
+    const target = document.querySelector(".controls");
+    if (target) target.parentNode.insertBefore(banner, target.nextSibling);
+  }
+  banner.innerHTML =
+    `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>` +
+    `<div>` +
+    warnings.map((w) => `<div>${escapeHtml(w)}</div>`).join("") +
+    `</div>` +
+    `<button type="button" aria-label="Dismiss" onclick="this.parentNode.remove()">&times;</button>`;
 }
 
 // ---------- Render: highlight fields, list games -----------------------

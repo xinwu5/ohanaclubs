@@ -124,9 +124,13 @@ async function loadPreview() {
     const r = await fetch(u);
     if (my !== previewSeq) return;       // newer request superseded us
     if (!r.ok) throw new Error("HTTP " + r.status);
-    const data = await r.json();
+    const payload = await r.json();
     if (my !== previewSeq) return;
+    // New shape: { events, warnings }. Old shape was a bare array.
+    const data = Array.isArray(payload) ? payload : (payload.events || []);
+    const warnings = Array.isArray(payload) ? [] : (payload.warnings || []);
     renderPreview(data);
+    showWarnings(warnings);
   } catch (e) {
     if (my !== previewSeq) return;
     previewBody.innerHTML =
@@ -134,6 +138,28 @@ async function loadPreview() {
   } finally {
     if (my === previewSeq) previewBody.classList.remove("loading");
   }
+}
+
+function showWarnings(warnings) {
+  let banner = document.getElementById("warnings-banner");
+  if (!warnings || !warnings.length) {
+    if (banner) banner.remove();
+    return;
+  }
+  if (!banner) {
+    banner = document.createElement("div");
+    banner.id = "warnings-banner";
+    banner.className = "warnings-banner";
+    // Insert above the selected/share bar
+    const sel = document.getElementById("selected");
+    sel.parentNode.insertBefore(banner, sel);
+  }
+  banner.innerHTML =
+    `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>` +
+    `<div>` +
+    warnings.map((w) => `<div>${escapeHtml(w)}</div>`).join("") +
+    `</div>` +
+    `<button type="button" aria-label="Dismiss" onclick="this.parentNode.remove()">&times;</button>`;
 }
 
 function renderPreview(data) {
@@ -325,9 +351,13 @@ async function loadTeams() {
   try {
     const r = await fetch(WORKER + "/teams.json");
     if (!r.ok) throw new Error("HTTP " + r.status);
-    const idx = await r.json();
+    const payload = await r.json();
+    // New shape: { teams, warnings }. Old shape was the team dict directly.
+    const idx = payload.teams || payload;
+    const warnings = payload.warnings || [];
     renderTeams(idx);
     status.classList.add("hide");
+    showWarnings(warnings);
     restoreSelection();
   } catch (e) {
     status.textContent = "Failed to load teams: " + e.message;
