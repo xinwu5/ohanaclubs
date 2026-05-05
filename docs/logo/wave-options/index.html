@@ -65,13 +65,20 @@
 
 <script>
   const waves = [
-    { id: "wave-1-sunrise",       title: "Sunrise dot",         tag: "Yellow sun above the waves." },
-    { id: "wave-1b-sunrise-soft", title: "Sunrise dot (soft)",  tag: "85% opacity \u2014 matches the diamond-head logo." },
-    { id: "wave-2-coral-wave",    title: "Coral wave",          tag: "Replace the second wave with coral." },
-    { id: "wave-2b-coral-soft",   title: "Coral wave (soft)",   tag: "85% opacity coral wave." },
-    { id: "wave-3-three-waves",   title: "Three waves",         tag: "White / coral / white." },
-    { id: "wave-4-sunset",        title: "Sunset background",   tag: "Orange-to-teal vertical gradient." },
-    { id: "wave-5-horizon",       title: "Coral horizon",       tag: "Orange band at the bottom." },
+    { id: "svg-0-original",        title: "★ ORIGINAL (#1 from /logo/)", tag: "The exact wave-disc from your first gallery: diagonal teal gradient, quadratic waves, small white dot above." },
+    { id: "svg-1-sunset-with-dot", title: "★ Sunset + dot",              tag: "Same waves + dot, sunset gradient." },
+    { id: "svg-2-sunset-no-dot",   title: "★ Sunset, no dot",            tag: "Same waves, sunset gradient, dot removed." },
+    { id: "wave-1-sunrise",        title: "Sunrise dot (yellow)",        tag: "Programmatic version (sine waves) — different from above." },
+    { id: "wave-1b-sunrise-soft", title: "Sunrise dot (yellow soft)", tag: "85% opacity yellow sun." },
+    { id: "wave-1c-coral-sun",    title: "Coral sun \u2606",         tag: "Sun in the sunset coral (#ff7e6b). Best of both worlds." },
+    { id: "wave-1d-coral-sun-soft", title: "Coral sun (soft)",       tag: "Coral sun at 85% opacity." },
+    { id: "wave-2-coral-wave",    title: "Coral wave",               tag: "Replace the second wave with coral." },
+    { id: "wave-2b-coral-soft",   title: "Coral wave (soft)",        tag: "85% opacity coral wave." },
+    { id: "wave-2c-coral-wave-white-dot", title: "Coral wave + white sun \u2606", tag: "White dot above; second wave coral." },
+    { id: "wave-3-three-waves",   title: "Three waves",              tag: "White / coral / white." },
+    { id: "wave-4-sunset",        title: "Sunset background",        tag: "Orange-to-teal vertical gradient (small waves)." },
+    { id: "wave-6-sunset-big-waves", title: "Sunset + original big waves \u2606", tag: "Sunset gradient with the bold original wave lines." },
+    { id: "wave-5-horizon",       title: "Coral horizon",            tag: "Orange band at the bottom." },
   ];
   const shells = [
     { id: "shell-1-scallop",       title: "Scallop fan",         tag: "Pearl + coral fan, like the Shell oil mark." },
@@ -82,25 +89,28 @@
 
   function render(target, items) {
     const el = document.getElementById(target);
-    el.innerHTML = items.map(d => `
+    el.innerHTML = items.map(d => {
+      const ext = d.id.startsWith('svg-') ? 'svg' : 'png';
+      const src = `${d.id}.${ext}`;
+      return `
       <article class="card">
         <div class="name">${target === 'waves' ? 'Wave' : 'Shell'}</div>
         <h3>${d.title}</h3>
         <p class="desc">${d.tag}</p>
         <div class="row bg-light">
-          <img class="lg" src="${d.id}.png" alt="${d.title}">
-          <img class="md" src="${d.id}.png" alt="">
-          <img class="sm" src="${d.id}.png" alt="">
+          <img class="lg" src="${src}" alt="${d.title}">
+          <img class="md" src="${src}" alt="">
+          <img class="sm" src="${src}" alt="">
           <span class="wm"><b>ohana</b>clubs</span>
         </div>
         <div class="row bg-dark">
-          <img class="lg" src="${d.id}.png" alt="">
-          <img class="md" src="${d.id}.png" alt="">
-          <img class="sm" src="${d.id}.png" alt="">
+          <img class="lg" src="${src}" alt="">
+          <img class="md" src="${src}" alt="">
+          <img class="sm" src="${src}" alt="">
           <span class="wm"><b>ohana</b>clubs</span>
         </div>
       </article>
-    `).join('');
+    `;}).join('');
   }
   render('waves', waves);
   render('shells', shells);
