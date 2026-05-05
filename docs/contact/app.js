@@ -24,7 +24,7 @@ form.addEventListener("submit", async (e) => {
 
   if (!KEY || KEY.startsWith("PASTE-")) {
     showStatus(
-      "Contact form is not configured yet. Please email viviana_wx@hotmail.com directly.",
+      "Contact form is not configured yet. Please try again later.",
       "err",
     );
     return;
@@ -83,7 +83,7 @@ form.addEventListener("submit", async (e) => {
     }
   } catch (err) {
     showStatus(
-      "Something went wrong: " + err.message + ". Please try again or email viviana_wx@hotmail.com.",
+      "Something went wrong: " + err.message + ". Please try again later.",
       "err",
     );
   } finally {
