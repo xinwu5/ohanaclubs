@@ -38,17 +38,42 @@ async function fetchUpstream(url: string): Promise<string> {
   const cached = await cache.match(cacheKey);
   if (cached) return await cached.text();
 
-  const resp = await fetch(url, { headers: { "user-agent": USER_AGENT } });
-  if (!resp.ok) throw new Error(`upstream ${resp.status} for ${url}`);
-  const text = await resp.text();
-  const cacheable = new Response(text, {
-    headers: {
-      "content-type": resp.headers.get("content-type") ?? "text/plain",
-      "cache-control": `public, max-age=${UPSTREAM_TTL}`,
-    },
-  });
-  await cache.put(cacheKey, cacheable);
-  return text;
+  // Retry transient failures (network errors + 5xx) with exponential backoff.
+  // Don't retry 4xx — they won't change.
+  const delays = [200, 500, 1500];
+  let lastErr: Error | null = null;
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    try {
+      const resp = await fetch(url, { headers: { "user-agent": USER_AGENT } });
+      if (!resp.ok) {
+        const err = new Error(`upstream ${resp.status} for ${url}`);
+        if (resp.status >= 400 && resp.status < 500) throw err;   // no retry
+        lastErr = err;
+        if (attempt < delays.length) {
+          await new Promise((r) => setTimeout(r, delays[attempt]));
+          continue;
+        }
+        throw err;
+      }
+      const text = await resp.text();
+      const cacheable = new Response(text, {
+        headers: {
+          "content-type": resp.headers.get("content-type") ?? "text/plain",
+          "cache-control": `public, max-age=${UPSTREAM_TTL}`,
+        },
+      });
+      await cache.put(cacheKey, cacheable);
+      return text;
+    } catch (e) {
+      lastErr = e as Error;
+      if (attempt < delays.length) {
+        await new Promise((r) => setTimeout(r, delays[attempt]));
+        continue;
+      }
+      throw lastErr;
+    }
+  }
+  throw lastErr ?? new Error("unreachable");
 }
 
 // ---------------------------------------------------------------------------
@@ -65,35 +90,49 @@ const FLIGHT_RE =
   /schedule_results2\.asp\?[^"']*?flightguid=([0-9A-F-]{36})/gi;
 const AGE_RE = /\b([BG]\d{2}U)\b/g;
 
-async function discoverFlights(): Promise<Flight[]> {
+// Discovery and event fetch return warnings alongside their data so we can
+// surface partial-failure status to the client (banner in the UI).
+
+interface FetchResult<T> {
+  data: T;
+  warnings: string[];
+}
+
+async function discoverFlights(): Promise<FetchResult<Flight[]>> {
   const out: Flight[] = [];
+  const warnings: string[] = [];
   for (const gender of ["girls", "boys"] as const) {
-    const html = await fetchUpstream(LIST_URL(gender));
-    const ages: { pos: number; age: string }[] = [];
-    for (const m of html.matchAll(AGE_RE)) {
-      ages.push({ pos: m.index ?? 0, age: m[1].toUpperCase() });
-    }
-    for (const m of html.matchAll(FLIGHT_RE)) {
-      const pos = m.index ?? 0;
-      const guid = m[1].toUpperCase();
-      // The age header for this guid is the most recent one before it.
-      let age = "?";
-      for (let i = ages.length - 1; i >= 0; i--) {
-        if (ages[i].pos < pos) {
-          age = ages[i].age;
-          break;
-        }
+    try {
+      const html = await fetchUpstream(LIST_URL(gender));
+      const ages: { pos: number; age: string }[] = [];
+      for (const m of html.matchAll(AGE_RE)) {
+        ages.push({ pos: m.index ?? 0, age: m[1].toUpperCase() });
       }
-      out.push({ age, gender, flightGuid: guid });
+      for (const m of html.matchAll(FLIGHT_RE)) {
+        const pos = m.index ?? 0;
+        const guid = m[1].toUpperCase();
+        let age = "?";
+        for (let i = ages.length - 1; i >= 0; i--) {
+          if (ages[i].pos < pos) {
+            age = ages[i].age;
+            break;
+          }
+        }
+        out.push({ age, gender, flightGuid: guid });
+      }
+    } catch (e) {
+      console.warn(`failed to discover ${gender} flights:`, e);
+      warnings.push(`Couldn't load ${gender} schedules right now (${(e as Error).message}). Try refreshing in a minute.`);
     }
   }
   // Deduplicate (same guid appears multiple times on the index page).
   const seen = new Set<string>();
-  return out.filter((f) => {
+  const unique = out.filter((f) => {
     if (seen.has(f.flightGuid)) return false;
     seen.add(f.flightGuid);
     return true;
   });
+  return { data: unique, warnings };
 }
 
 // ---------------------------------------------------------------------------
@@ -161,8 +200,10 @@ function parseEvents(ics: string, age: string, gender: string): Event[] {
   return events;
 }
 
-async function fetchAllEvents(): Promise<Event[]> {
-  const flights = await discoverFlights();
+async function fetchAllEvents(): Promise<FetchResult<Event[]>> {
+  const { data: flights, warnings } = await discoverFlights();
+  // Track per-age-group failures separately so we can name them in warnings.
+  const failed: string[] = [];
   const all = await Promise.all(
     flights.map(async (f) => {
       try {
@@ -170,11 +211,15 @@ async function fetchAllEvents(): Promise<Event[]> {
         return parseEvents(ics, f.age, f.gender);
       } catch (e) {
         console.warn(`failed ${f.age}/${f.gender}: ${(e as Error).message}`);
+        failed.push(`${f.age} ${f.gender}`);
         return [] as Event[];
       }
     }),
   );
-  return all.flat();
+  if (failed.length) {
+    warnings.push(`Couldn't load: ${failed.join(", ")}. Try refreshing in a minute.`);
+  }
+  return { data: all.flat(), warnings };
 }
 
 // ---------------------------------------------------------------------------
@@ -412,22 +457,30 @@ export default {
           return new Response("ok\n", { headers: CORS_HEADERS });
 
         case "/teams.json": {
-          const events = await fetchAllEvents();
-          return jsonResponse(teamIndex(events));
+          const { data: events, warnings } = await fetchAllEvents();
+          return jsonResponse({
+            teams: teamIndex(events),
+            warnings,
+          });
         }
 
         case "/calendar.ics":
         case "/oahu.ics": {
-          const events = await fetchAllEvents();
+          const { data: events, warnings } = await fetchAllEvents();
           const filtered = filterEvents(events, teams, ages);
           const ics = buildIcs(filtered, calName, teams);
-          return textResponse(ics, "text/calendar; charset=utf-8", {
+          // Surface warnings to the calendar via X-Warnings header (apps
+          // ignore it but it's there for debugging) and as a comment line
+          // inside the ics that calendar apps preserve.
+          const headers: Record<string, string> = {
             "content-disposition": 'inline; filename="oahu.ics"',
-          });
+          };
+          if (warnings.length) headers["x-warnings"] = warnings.join(" | ");
+          return textResponse(ics, "text/calendar; charset=utf-8", headers);
         }
 
         case "/preview.json": {
-          const events = await fetchAllEvents();
+          const { data: events, warnings } = await fetchAllEvents();
           const filtered = filterEvents(events, teams, ages);
           const sel = new Set(teams.map((t) => t.trim().toLowerCase()));
           const rows = filtered
@@ -440,7 +493,7 @@ export default {
                 ),
             )
             .slice(0, 200);
-          return jsonResponse(rows);
+          return jsonResponse({ events: rows, warnings });
         }
 
         case "/":

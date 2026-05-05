@@ -120,3 +120,28 @@ button:active, .btn:active { transform: translateY(1px); }
 @media (prefers-color-scheme: dark) {
   .wave-divider { color: var(--brand-700); }
 }
+
+/* Warnings banner used on /schedule and /map for partial-data alerts */
+.warnings-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  margin: 0 0 1rem;
+  background: #fef6e7;
+  color: #6b4f00;
+  border: 1px solid #e8c870;
+  border-radius: var(--radius);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+@media (prefers-color-scheme: dark) {
+  .warnings-banner { background: #2a200b; color: #f4dba0; border-color: #6b5520; }
+}
+.warnings-banner svg { flex-shrink: 0; margin-top: 1px; color: var(--coral-dark, #b35d22); }
+.warnings-banner > div { flex: 1; min-width: 0; }
+.warnings-banner button {
+  background: transparent; border: none; color: inherit;
+  font-size: 1.3rem; cursor: pointer; padding: 0 0.3rem; line-height: 1;
+}
+.warnings-banner button:hover { opacity: 0.6; }
