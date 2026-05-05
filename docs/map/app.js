@@ -257,15 +257,37 @@ dateInput.value = (initialDate && /^\d{4}-\d{2}-\d{2}$/.test(initialDate))
 dateInput.addEventListener("change", render);
 filterEl.addEventListener("change", render);
 
-// Wait until the SVG is loaded before doing the first paint.
-function boot() {
-  loadAllGames().then(() => {
-    if (initialHighlight) {
-      // Wait one tick for cards to render, then flash the field.
-      setTimeout(() => flashField(initialHighlight), 50);
-    }
-  });
+// Race-safe boot: kick off games fetch immediately AND attach a SVG-load
+// listener that re-paints the map once the SVG is ready. Whichever finishes
+// last completes the picture; paintMap() no-ops cleanly if either side
+// isn't ready.
+
+let svgReady = false;
+
+mapObj.addEventListener("load", () => {
+  svgReady = true;
+  // Re-render now that the SVG can be queried; renders the field colors
+  // even if the games fetch finished first.
+  if (allGames.length) render();
+  if (initialHighlight) {
+    setTimeout(() => flashField(initialHighlight), 50);
+  }
+});
+
+// Sometimes the SVG is already loaded by the time the script runs; in that
+// case the 'load' event won't fire. Fall back to checking readyState.
+if (mapObj.contentDocument && mapObj.contentDocument.readyState === "complete") {
+  svgReady = true;
 }
+
+loadAllGames().then(() => {
+  // If the SVG was already ready when games arrived, render() above already
+  // painted. If not, the SVG-load handler will re-render. Either way, kick
+  // the highlight only after the second condition is satisfied.
+  if (svgReady && initialHighlight) {
+    setTimeout(() => flashField(initialHighlight), 50);
+  }
+});
 
 function flashField(label) {
   // Strip the half letter for the SVG lookup (rect[data-field="N"]).
@@ -280,10 +302,4 @@ function flashField(label) {
   rect.style.filter = "brightness(1.4) drop-shadow(0 0 10px #ff7e6b)";
   setTimeout(() => { rect.style.filter = ""; }, 1500);
   mapObj.scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
-if (mapObj.contentDocument && mapObj.contentDocument.readyState === "complete") {
-  boot();
-} else {
-  mapObj.addEventListener("load", boot);
 }

@@ -54,20 +54,22 @@ form.addEventListener("submit", async (e) => {
   submitBtn.textContent = "Sending\u2026";
   showStatus("", "");
 
-  const data = {
-    access_key: KEY,
-    name,
-    email,
-    message,
-    from_name: "ohanaclubs.com",
-    subject: form.elements["subject"].value || "ohanaclubs feedback",
-  };
+  // FormData / urlencoded avoids the CORS preflight that Web3Forms blocks
+  // when content-type is application/json. Their docs actually recommend
+  // standard form encoding.
+  const body = new FormData();
+  body.append("access_key", KEY);
+  body.append("name", name);
+  body.append("email", email);
+  body.append("message", message);
+  body.append("from_name", "ohanaclubs.com");
+  body.append("subject", form.elements["subject"].value || "ohanaclubs feedback");
 
   try {
     const r = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
-      headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify(data),
+      headers: { accept: "application/json" },
+      body,
     });
     const result = await r.json();
     if (r.ok && result.success) {
