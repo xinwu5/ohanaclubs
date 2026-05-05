@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wave + Shell options &mdash; ohanaclubs</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://ohanaclubs.com/logo/wave-options/">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+  h1 { font-family: var(--font-display, Georgia, serif); margin: 0 0 0.4rem; font-size: 2rem; }
+  .lede { color: var(--fg-muted); margin: 0 0 2rem; }
+  .nav { font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .nav a { color: var(--brand-600); }
+  .section { margin-bottom: 2.5rem; }
+  .section h2 {
+    font-family: var(--font-display, Georgia, serif);
+    margin: 0 0 1rem; font-size: 1.4rem; color: var(--fg);
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.2rem;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .card .name { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--brand-600); font-weight: 700; padding: 0.7rem 1rem 0; }
+  .card h3 { font-family: var(--font-display, Georgia, serif); font-size: 1.1rem; margin: 0.1rem 1rem 0.4rem; }
+  .card .desc { color: var(--fg-muted); font-size: 0.88rem; margin: 0; padding: 0 1rem 0.8rem; }
+  .row { display: flex; align-items: center; gap: 0.6rem; padding: 0.8rem 1rem; }
+  .row.bg-light { background: #fff; }
+  .row.bg-dark  { background: #06303c; }
+  .row.bg-bg    { background: var(--bg); }
+  .lg { width: 96px; height: 96px; }
+  .md { width: 56px; height: 56px; }
+  .sm { width: 28px; height: 28px; }
+  .wm { font-family: var(--font-display, Georgia, serif); font-size: 1.2rem; color: #0a2933; flex: 1; }
+  .wm b { color: var(--brand-600); }
+  .row.bg-dark .wm { color: #fff; }
+  .row.bg-dark .wm b { color: #c9ecf1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="nav"><a href="/logo/">&larr; back to logo gallery</a></p>
+  <h1>Wave-disc &amp; shell options</h1>
+  <p class="lede">Variations of the wave-disc with orange/coral accents, plus a few shell-themed alternatives. Each shown at three sizes on light and dark backgrounds.</p>
+
+  <section class="section">
+    <h2>Wave-disc with orange accents</h2>
+    <div class="grid" id="waves"></div>
+  </section>
+
+  <section class="section">
+    <h2>Shell-themed</h2>
+    <div class="grid" id="shells"></div>
+  </section>
+</div>
+
+<script>
+  const waves = [
+    { id: "wave-1-sunrise",       title: "Sunrise dot",         tag: "Yellow sun above the waves." },
+    { id: "wave-1b-sunrise-soft", title: "Sunrise dot (soft)",  tag: "85% opacity \u2014 matches the diamond-head logo." },
+    { id: "wave-2-coral-wave",    title: "Coral wave",          tag: "Replace the second wave with coral." },
+    { id: "wave-2b-coral-soft",   title: "Coral wave (soft)",   tag: "85% opacity coral wave." },
+    { id: "wave-3-three-waves",   title: "Three waves",         tag: "White / coral / white." },
+    { id: "wave-4-sunset",        title: "Sunset background",   tag: "Orange-to-teal vertical gradient." },
+    { id: "wave-5-horizon",       title: "Coral horizon",       tag: "Orange band at the bottom." },
+  ];
+  const shells = [
+    { id: "shell-1-scallop",       title: "Scallop fan",         tag: "Pearl + coral fan, like the Shell oil mark." },
+    { id: "shell-2-nautilus",      title: "Nautilus spiral",     tag: "Logarithmic spiral fading from white to coral." },
+    { id: "shell-3-cowrie",        title: "Cowrie",              tag: "Pearl oval with coral ridges." },
+    { id: "shell-4-sunset-scallop", title: "Scallop on sunset",  tag: "Tighter ribs against a sunset gradient." },
+  ];
+
+  function render(target, items) {
+    const el = document.getElementById(target);
+    el.innerHTML = items.map(d => `
+      <article class="card">
+        <div class="name">${target === 'waves' ? 'Wave' : 'Shell'}</div>
+        <h3>${d.title}</h3>
+        <p class="desc">${d.tag}</p>
+        <div class="row bg-light">
+          <img class="lg" src="${d.id}.png" alt="${d.title}">
+          <img class="md" src="${d.id}.png" alt="">
+          <img class="sm" src="${d.id}.png" alt="">
+          <span class="wm"><b>ohana</b>clubs</span>
+        </div>
+        <div class="row bg-dark">
+          <img class="lg" src="${d.id}.png" alt="">
+          <img class="md" src="${d.id}.png" alt="">
+          <img class="sm" src="${d.id}.png" alt="">
+          <span class="wm"><b>ohana</b>clubs</span>
+        </div>
+      </article>
+    `).join('');
+  }
+  render('waves', waves);
+  render('shells', shells);
+</script>
+</body>
+</html>
