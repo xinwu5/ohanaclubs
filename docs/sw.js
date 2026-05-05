@@ -8,7 +8,7 @@
  * Bump CACHE_VERSION whenever the static shell changes.
  */
 
-const CACHE_VERSION = "v7";
+const CACHE_VERSION = "v8";
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
 
