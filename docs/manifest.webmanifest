@@ -1,13 +1,13 @@
 {
-  "name": "Oahu Soccer Schedule",
-  "short_name": "Oahu Soccer",
-  "description": "Subscribe to Oahu League soccer games for the team(s) you care about.",
+  "name": "ohanaclubs",
+  "short_name": "ohanaclubs",
+  "description": "Hawaii youth sports, organized. Subscribe to the games that actually matter to your family.",
   "start_url": "https://ohanaclubs.com/",
   "scope": "https://ohanaclubs.com/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#22aa77",
+  "theme_color": "#168ea0",
   "lang": "en",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
