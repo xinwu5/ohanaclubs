@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact &mdash; ohanaclubs</title>
+<meta name="description" content="Send feedback, bug reports, or ideas to the ohanaclubs team.">
+<meta name="theme-color" content="#168ea0">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="canonical" href="https://ohanaclubs.com/contact/">
+<meta property="og:title" content="Contact &mdash; ohanaclubs">
+<meta property="og:description" content="Send us feedback, bugs, or ideas.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ohanaclubs.com/contact/">
+<meta property="og:image" content="https://ohanaclubs.com/icons/logo-square.png?v=3">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta name="twitter:card" content="summary">
+
+<!-- Google Analytics (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9GZR6F0V78"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9GZR6F0V78');
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/assets/theme.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="/">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#5cc4d1"/>
+            <stop offset="100%" stop-color="#0f7286"/>
+          </linearGradient>
+        </defs>
+        <circle cx="16" cy="16" r="14" fill="url(#lg)"/>
+        <path d="M2 20 Q 8 16 14 20 T 26 20 T 38 20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+        <path d="M2 24 Q 8 20 14 24 T 26 24 T 38 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+      </svg>
+      <span>ohana<b>clubs</b></span>
+    </a>
+    <nav>
+      <a href="/schedule/">Schedule</a>
+      <a href="/map/">Map</a>
+      <a href="/contact/">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <header class="page-head">
+    <h1>Contact us</h1>
+    <p class="page-sub">
+      Bug? Feature idea? Wrong field on the map? We&rsquo;d love to hear from you. Most messages get a reply within a day or two.
+    </p>
+  </header>
+
+  <form id="contact-form" class="contact-form" novalidate>
+    <div class="row">
+      <label for="name">Your name <span class="hint">(optional)</span></label>
+      <input id="name" name="name" type="text" autocomplete="name" maxlength="100">
+    </div>
+
+    <div class="row">
+      <label for="email">Your email <span class="hint">(optional &mdash; only if you want a reply)</span></label>
+      <input id="email" name="email" type="email" autocomplete="email" maxlength="200">
+    </div>
+
+    <div class="row">
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="6" required maxlength="5000" placeholder="What's on your mind?"></textarea>
+    </div>
+
+    <!-- Honeypot: bots fill this; humans never see it. -->
+    <div class="hp" aria-hidden="true">
+      <label for="website">Website</label>
+      <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+    </div>
+
+    <!-- Web3Forms metadata -->
+    <input type="hidden" name="from_name" value="ohanaclubs.com">
+    <input type="hidden" name="subject" value="ohanaclubs feedback">
+
+    <div class="actions">
+      <button id="submit" class="btn primary" type="submit">Send message</button>
+      <p id="status" class="status hide" role="status"></p>
+    </div>
+  </form>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap"><p>&copy; ohanaclubs &middot; not affiliated with Oahu League / HYSA.</p></div>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
