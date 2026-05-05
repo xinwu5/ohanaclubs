@@ -415,26 +415,34 @@ function eventPreviewRow(
   };
 }
 
-function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": "public, max-age=300",
-      ...CORS_HEADERS,
-    },
-  });
+function jsonResponse(body: unknown, status = 200, hasWarnings = false): Response {
+  // Partial data is cached for only 30s so a refresh ~1 min later picks up
+  // recovered upstreams. Healthy responses keep the longer 5-min TTL.
+  const cacheControl = hasWarnings
+    ? "public, max-age=30, must-revalidate"
+    : "public, max-age=300";
+  const headers: Record<string, string> = {
+    "content-type": "application/json; charset=utf-8",
+    "cache-control": cacheControl,
+    ...CORS_HEADERS,
+  };
+  if (hasWarnings) headers["x-warnings"] = "1";
+  return new Response(JSON.stringify(body), { status, headers });
 }
 
 function textResponse(
   body: string,
   ctype: string,
   extra: Record<string, string> = {},
+  hasWarnings = false,
 ): Response {
+  const cacheControl = hasWarnings
+    ? "public, max-age=30, must-revalidate"
+    : "public, max-age=300";
   return new Response(body, {
     headers: {
       "content-type": ctype,
-      "cache-control": "public, max-age=300",
+      "cache-control": cacheControl,
       ...CORS_HEADERS,
       ...extra,
     },
@@ -461,7 +469,7 @@ export default {
           return jsonResponse({
             teams: teamIndex(events),
             warnings,
-          });
+          }, 200, warnings.length > 0);
         }
 
         case "/calendar.ics":
@@ -469,14 +477,11 @@ export default {
           const { data: events, warnings } = await fetchAllEvents();
           const filtered = filterEvents(events, teams, ages);
           const ics = buildIcs(filtered, calName, teams);
-          // Surface warnings to the calendar via X-Warnings header (apps
-          // ignore it but it's there for debugging) and as a comment line
-          // inside the ics that calendar apps preserve.
           const headers: Record<string, string> = {
             "content-disposition": 'inline; filename="oahu.ics"',
           };
           if (warnings.length) headers["x-warnings"] = warnings.join(" | ");
-          return textResponse(ics, "text/calendar; charset=utf-8", headers);
+          return textResponse(ics, "text/calendar; charset=utf-8", headers, warnings.length > 0);
         }
 
         case "/preview.json": {
@@ -493,7 +498,7 @@ export default {
                 ),
             )
             .slice(0, 200);
-          return jsonResponse({ events: rows, warnings });
+          return jsonResponse({ events: rows, warnings }, 200, warnings.length > 0);
         }
 
         case "/":

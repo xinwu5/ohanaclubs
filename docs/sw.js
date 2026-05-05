@@ -8,7 +8,7 @@
  * Bump CACHE_VERSION whenever the static shell changes.
  */
 
-const CACHE_VERSION = "v17";
+const CACHE_VERSION = "v18";
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
 
@@ -83,7 +83,11 @@ async function networkFirst(request, cacheName, timeoutMs = 3000) {
       fetch(request),
       new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), timeoutMs)),
     ]);
-    if (network && network.ok) cache.put(request, network.clone()).catch(() => {});
+    // Don't cache partial-data responses — they have an x-warnings header.
+    // This way a refresh after upstream recovery actually picks up new data.
+    if (network && network.ok && !network.headers.get("x-warnings")) {
+      cache.put(request, network.clone()).catch(() => {});
+    }
     return network;
   } catch (e) {
     const cached = await cache.match(request);
