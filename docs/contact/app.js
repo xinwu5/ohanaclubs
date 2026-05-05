@@ -30,7 +30,19 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+  const name = form.elements["name"].value.trim();
+  const email = form.elements["email"].value.trim();
   const message = form.elements["message"].value.trim();
+  if (!name) {
+    showStatus("Please enter your name.", "err");
+    form.elements["name"].focus();
+    return;
+  }
+  if (!email) {
+    showStatus("Please enter your email.", "err");
+    form.elements["email"].focus();
+    return;
+  }
   if (!message) {
     showStatus("Please write a message.", "err");
     form.elements["message"].focus();
@@ -44,8 +56,8 @@ form.addEventListener("submit", async (e) => {
 
   const data = {
     access_key: KEY,
-    name: form.elements["name"].value.trim() || "(no name)",
-    email: form.elements["email"].value.trim() || "(no email provided)",
+    name,
+    email,
     message,
     from_name: "ohanaclubs.com",
     subject: form.elements["subject"].value || "ohanaclubs feedback",
