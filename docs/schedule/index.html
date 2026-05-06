@@ -136,16 +136,51 @@
               <a id="download" class="btn ghost" href="#" download="oahu.ics">Download .ics</a>
             </div>
             <div class="url-row">Calendar URL: <span id="url" class="url"></span></div>
-            <ul class="sb-help">
-              <li><b>iPhone &middot; Apple Calendar:</b> tap <i>Subscribe</i> &rarr; Subscribe &rarr; Add. Set Fetch to <b>Daily</b> (default is weekly) in Settings &rarr; Calendar &rarr; Accounts &rarr; Subscribed Calendars.</li>
-              <li><b>Mac &middot; Apple Calendar:</b> click <i>Subscribe</i>; in the dialog set Auto-refresh to "Every day".</li>
-              <li><b>Android / Google Calendar:</b> tap <i>Copy URL</i>, then on a desktop browser open <a href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener">Google Calendar &rarr; Add by URL</a>, paste, click Add.</li>
-              <li><b>Outlook:</b> Add calendar &rarr; Subscribe from web &rarr; paste the URL.</li>
-            </ul>
           </div>
         </details>
       </div>
     </div>
+
+    <!-- Permanent How-to-subscribe expandable (right under the subscribe bar) -->
+    <details id="howto" class="howto hide">
+      <summary>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+        How to subscribe (Apple / Google / Outlook)
+      </summary>
+      <div class="howto-body">
+        <div class="howto-card">
+          <h4>📱 iPhone &middot; Apple Calendar</h4>
+          <ol>
+            <li>Tap the green <b>Subscribe</b> button above</li>
+            <li>Confirm in the popup &rarr; <b>Add</b></li>
+            <li><b>Important:</b> open <i>Settings → Calendar → Accounts → Subscribed Calendars → ohanaclubs</i> and set <b>Fetch</b> to <b>Daily</b> (Apple's default is <b>weekly</b>, so changes won't show up otherwise!)</li>
+          </ol>
+        </div>
+        <div class="howto-card">
+          <h4>💻 Mac &middot; Apple Calendar</h4>
+          <ol>
+            <li>Click the green <b>Subscribe</b> button</li>
+            <li>In the dialog, set <b>Auto-refresh</b> to <b>Every day</b></li>
+          </ol>
+        </div>
+        <div class="howto-card">
+          <h4>🤖 Android / Google Calendar</h4>
+          <ol>
+            <li>Tap <b>Copy URL</b> (in the &hellip; menu)</li>
+            <li>On a <b>desktop browser</b>, open <a href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noopener">Google Calendar &rarr; Add by URL</a></li>
+            <li>Paste the URL, click <b>Add Calendar</b>. Syncs to all your devices.</li>
+          </ol>
+          <p class="howto-note">Google refreshes subscribed calendars about once a day; you can't change it.</p>
+        </div>
+        <div class="howto-card">
+          <h4>📧 Outlook</h4>
+          <ol>
+            <li>Tap <b>Copy URL</b></li>
+            <li>In Outlook: <i>Add calendar → Subscribe from web</i> → paste the URL</li>
+          </ol>
+        </div>
+      </div>
+    </details>
 
     <!-- Upcoming games preview (appears once teams selected, near top) -->
     <section id="preview" class="preview hide" aria-live="polite">

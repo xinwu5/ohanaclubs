@@ -239,17 +239,20 @@ const debouncedReload = debounce(() => loadPreview(), 350);
 
 function onSelectionChanged() {
   const teams = selectedTeams();
+  const howto = document.getElementById("howto");
 
   persistTeams(teams);
 
   if (!teams.length) {
     selected.classList.add("hide");
+    if (howto) howto.classList.add("hide");
     previewEl.classList.add("hide");
     previewBody.innerHTML = "";
     updatePickerCount();
     return;
   }
   selected.classList.remove("hide");
+  if (howto) howto.classList.remove("hide");
   renderChips(teams);
 
   // Update the compact label: "1 team" / "2 teams" + comma-separated names
@@ -274,13 +277,39 @@ function onSelectionChanged() {
 
 form.addEventListener("change", onSelectionChanged);
 
-// When user clicks Subscribe, mark "subscribed" so the green check shows
-// on subsequent visits. False positives are fine — the badge is reassurance,
-// not a guarantee.
+// When user clicks Subscribe: mark "subscribed", show the green check, and
+// (one-time per device) show an iPhone-only toast reminding them to set the
+// fetch interval to Daily — Apple's default is weekly, which is the #1 cause
+// of "my calendar didn't update" complaints.
+const TOAST_SHOWN_KEY = "ohanaclubs.schedule.toastShown.v1";
+const isIos = /iP(hone|ad|od)/.test(navigator.userAgent);
+
+function showSubscribeToast() {
+  if (!isIos) return;
+  if (localStorage.getItem(TOAST_SHOWN_KEY) === "1") return;
+  try { localStorage.setItem(TOAST_SHOWN_KEY, "1"); } catch {}
+
+  const toast = document.createElement("div");
+  toast.className = "subscribe-toast";
+  toast.innerHTML = `
+    <button class="close" aria-label="Dismiss" onclick="this.parentNode.remove()">&times;</button>
+    <div>
+      <b>📱 One more step on iPhone</b><br>
+      Apple defaults subscribed calendars to refresh <b>weekly</b>. To see field/time changes the same day:<br>
+      <small style="opacity:0.85">Settings → Calendar → Accounts → Subscribed Calendars → ohanaclubs → Fetch → <b>Daily</b></small>
+      <br>
+      <button onclick="this.closest('.subscribe-toast').remove()">Got it</button>
+    </div>`;
+  document.body.appendChild(toast);
+  // Auto-dismiss after 30s if user ignores
+  setTimeout(() => toast.remove(), 30000);
+}
+
 if (subscribe) {
   subscribe.addEventListener("click", () => {
     try { localStorage.setItem(SUBSCRIBED_KEY, "1"); } catch {}
     if (sbBadge) sbBadge.classList.remove("hide");
+    showSubscribeToast();
   });
 }
 
