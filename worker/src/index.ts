@@ -32,14 +32,29 @@ const CORS_HEADERS: Record<string, string> = {
 // HTTP fetch with edge cache
 // ---------------------------------------------------------------------------
 
+// Server-side cache strategy with stale-on-error fallback.
+//
+// We keep cached upstream responses for 24 hours but treat them as "fresh"
+// only for UPSTREAM_TTL (15 min). After that we try a network refresh; if
+// it succeeds we update the cache, if it fails we fall back to whatever
+// stale copy we have. The end result: as long as we ever fetched a flight
+// successfully, parents see that data instead of a warning even when
+// sportsaffinity is fully down.
+
+const STALE_MAX_AGE = 24 * 60 * 60;   // keep stale copies for 24h
+const FETCHED_AT = "x-ohana-fetched-at";
+
 async function fetchUpstream(url: string): Promise<string> {
   const cache = caches.default;
   const cacheKey = new Request(url, { method: "GET" });
   const cached = await cache.match(cacheKey);
-  if (cached) return await cached.text();
 
-  // Retry transient failures (network errors + 5xx) with exponential backoff.
-  // Don't retry 4xx — they won't change.
+  // Fresh hit — use it, no network call
+  if (cached && isFresh(cached)) {
+    return await cached.text();
+  }
+
+  // Try upstream, with retries; on hard failure, fall back to stale cache
   const delays = [200, 500, 1500];
   let lastErr: Error | null = null;
   for (let attempt = 0; attempt <= delays.length; attempt++) {
@@ -47,19 +62,24 @@ async function fetchUpstream(url: string): Promise<string> {
       const resp = await fetch(url, { headers: { "user-agent": USER_AGENT } });
       if (!resp.ok) {
         const err = new Error(`upstream ${resp.status} for ${url}`);
-        if (resp.status >= 400 && resp.status < 500) throw err;   // no retry
+        if (resp.status >= 400 && resp.status < 500) {
+          // 4xx won't recover; if we have ANY stale copy, prefer it
+          if (cached) return await cached.text();
+          throw err;
+        }
         lastErr = err;
         if (attempt < delays.length) {
           await new Promise((r) => setTimeout(r, delays[attempt]));
           continue;
         }
-        throw err;
+        break;   // all retries exhausted; fall through to stale fallback
       }
       const text = await resp.text();
       const cacheable = new Response(text, {
         headers: {
           "content-type": resp.headers.get("content-type") ?? "text/plain",
-          "cache-control": `public, max-age=${UPSTREAM_TTL}`,
+          "cache-control": `public, max-age=${STALE_MAX_AGE}`,
+          [FETCHED_AT]: String(Date.now()),
         },
       });
       await cache.put(cacheKey, cacheable);
@@ -70,10 +90,22 @@ async function fetchUpstream(url: string): Promise<string> {
         await new Promise((r) => setTimeout(r, delays[attempt]));
         continue;
       }
-      throw lastErr;
+      break;
     }
   }
-  throw lastErr ?? new Error("unreachable");
+
+  // All retries failed. Serve stale if we have it.
+  if (cached) {
+    console.warn(`serving stale cache for ${url} after upstream failure: ${lastErr?.message}`);
+    return await cached.text();
+  }
+  throw lastErr ?? new Error(`upstream failed and no cache for ${url}`);
+}
+
+function isFresh(response: Response): boolean {
+  const fetchedAt = parseInt(response.headers.get(FETCHED_AT) || "0", 10);
+  if (!fetchedAt) return false;
+  return Date.now() - fetchedAt < UPSTREAM_TTL * 1000;
 }
 
 // ---------------------------------------------------------------------------
