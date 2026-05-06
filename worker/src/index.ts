@@ -18,7 +18,7 @@ const LIST_URL = (show: string) =>
 const ICS_URL = (flight: string) =>
   `${BASE}/ischedule.aspx?flightguid=${flight}&tournamentguid=${TOURNAMENT_GUID}`;
 
-const UPSTREAM_TTL = 60 * 15; // 15 min
+const UPSTREAM_TTL = 60 * 60; // 1 hour
 const USER_AGENT =
   "oahu-soccer-schedule/1.0 (+https://github.com/xinwu5/ohanaclubs)";
 
