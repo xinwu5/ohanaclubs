@@ -16,7 +16,10 @@ const copyBtn    = $("copy");
 const urlEl      = $("url");
 const previewEl  = $("preview");
 const previewBody= $("preview-body");
-const previewRefresh = $("preview-refresh");
+const previewRefresh = $("preview-refresh");  // removed from DOM; reference kept for backward compatibility
+const pickerDone = $("picker-done");
+const syncToggle = $("sync-toggle");
+const syncPanel = $("sync-panel");
 const clearBtn   = $("clear");
 const search     = $("search");
 const picker     = $("picker-wrap");
@@ -87,13 +90,30 @@ function debounce(fn, ms) {
 function renderChips(teams) {
   chips.innerHTML = "";
   if (!teams.length) return;
-  // Compact bar: chips render as inline plain text (e.g. "FC Hawaii 14B Blue, Leahi 14G East Blue")
   const fragment = document.createDocumentFragment();
   teams.forEach((t) => {
-    const span = document.createElement("span");
-    span.className = "chip";
-    span.textContent = " " + t;
-    fragment.appendChild(span);
+    const chip = document.createElement("span");
+    chip.className = "chip removable";
+    const label = document.createElement("span");
+    label.className = "chip-label";
+    label.textContent = t;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chip-remove";
+    btn.setAttribute("aria-label", `Remove ${t}`);
+    btn.textContent = "×";
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const cb = form.querySelector(`input[value="${CSS.escape(t)}"]`);
+      if (cb) {
+        cb.checked = false;
+        onSelectionChanged();
+      }
+    });
+    chip.appendChild(label);
+    chip.appendChild(btn);
+    fragment.appendChild(chip);
   });
   chips.appendChild(fragment);
 }
@@ -239,20 +259,19 @@ const debouncedReload = debounce(() => loadPreview(), 350);
 
 function onSelectionChanged() {
   const teams = selectedTeams();
-  const howto = document.getElementById("howto");
 
   persistTeams(teams);
 
   if (!teams.length) {
     selected.classList.add("hide");
-    if (howto) howto.classList.add("hide");
     previewEl.classList.add("hide");
     previewBody.innerHTML = "";
+    if (syncPanel) syncPanel.classList.add("hide");
+    if (syncToggle) syncToggle.setAttribute("aria-expanded", "false");
     updatePickerCount();
     return;
   }
   selected.classList.remove("hide");
-  if (howto) howto.classList.remove("hide");
   renderChips(teams);
 
   // Update the compact label: "1 team" / "2 teams" + comma-separated names
@@ -274,6 +293,25 @@ function onSelectionChanged() {
 }
 
 // ---------- Wire up events -----------------------------------------------
+
+if (pickerDone) {
+  pickerDone.addEventListener("click", () => {
+    picker.open = false;
+    // Scroll the picker title into view so the next thing the user sees
+    // is the preview/games list, not the middle of the form.
+    picker.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+if (syncToggle && syncPanel) {
+  syncToggle.addEventListener("click", () => {
+    const open = syncPanel.classList.toggle("hide");
+    // toggle returns true if class was added (i.e. now hidden)
+    const expanded = !open;
+    syncToggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+    syncPanel.setAttribute("aria-hidden", expanded ? "false" : "true");
+  });
+}
 
 form.addEventListener("change", onSelectionChanged);
 
@@ -371,7 +409,7 @@ copyBtn.addEventListener("click", async () => {
   }
 });
 
-previewRefresh.addEventListener("click", () => loadPreview());
+if (previewRefresh) previewRefresh.addEventListener("click", () => loadPreview());
 
 // ---------- Boot: load teams, restore selections -------------------------
 
