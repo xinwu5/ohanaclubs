@@ -11,12 +11,32 @@
  * `caches.default` keyed by URL.
  */
 
-const TOURNAMENT_GUID = "94D44303-F331-4505-92B2-813593B3FC50";
-const BASE = "https://ol-spring-25-26.sportsaffinity.com/tour/public/info";
-const LIST_URL = (show: string) =>
-  `${BASE}/accepted_list.asp?tournamentguid=${TOURNAMENT_GUID}&show=${show}`;
-const ICS_URL = (flight: string) =>
-  `${BASE}/ischedule.aspx?flightguid=${flight}&tournamentguid=${TOURNAMENT_GUID}`;
+interface Tournament {
+  id: string;       // short tag, used in warnings
+  name: string;     // human-friendly
+  base: string;     // host + path prefix
+  guid: string;
+}
+
+const TOURNAMENTS: Tournament[] = [
+  {
+    id: "ol-spring",
+    name: "Oahu League Spring 2025/26",
+    base: "https://ol-spring-25-26.sportsaffinity.com/tour/public/info",
+    guid: "94D44303-F331-4505-92B2-813593B3FC50",
+  },
+  {
+    id: "mdc-2026",
+    name: "Memorial Day Cup 2026",
+    base: "https://2026hysa-mdc.sportsaffinity.com/tour/public/info",
+    guid: "B5A7EF63-91EA-486B-AB02-DC2A5CD041F1",
+  },
+];
+
+const LIST_URL = (t: Tournament, show: string) =>
+  `${t.base}/accepted_list.asp?tournamentguid=${t.guid}&show=${show}`;
+const ICS_URL = (t: Tournament, flight: string) =>
+  `${t.base}/ischedule.aspx?flightguid=${flight}&tournamentguid=${t.guid}`;
 
 const UPSTREAM_TTL = 60 * 60; // 1 hour
 const USER_AGENT =
@@ -27,6 +47,14 @@ const CORS_HEADERS: Record<string, string> = {
   "access-control-allow-methods": "GET, OPTIONS",
   "access-control-allow-headers": "*",
 };
+
+interface Env {
+  CAL_STORE: KVNamespace;
+  REFRESH_TOKEN?: string;
+}
+
+const EVENTS_CACHE_KEY = "events:v1";
+const EVENTS_CACHE_TTL_SECONDS = 24 * 60 * 60;
 
 // ---------------------------------------------------------------------------
 // HTTP fetch with edge cache
@@ -116,11 +144,28 @@ interface Flight {
   age: string; // e.g. "G12U"
   gender: "girls" | "boys";
   flightGuid: string;
+  tournament: Tournament;
 }
 
 const FLIGHT_RE =
   /schedule_results2\.asp\?[^"']*?flightguid=([0-9A-F-]{36})/gi;
-const AGE_RE = /\b([BG]\d{2}U)\b/g;
+// Matches: "B07U"/"G12U" (Oahu League), "BU07"/"GU12" (MDC age tags), "U07"/"U12" (MDC fallback).
+const AGE_RE = /\b([BG]\d{2}U|[BG]U\d{2}|U\d{2})\b/g;
+
+function normalizeAge(raw: string, gender: "girls" | "boys"): string {
+  const upper = raw.toUpperCase();
+  // "BU07" / "GU12" -> "B07U" / "G12U"
+  let m = upper.match(/^([BG])U(\d{2})$/);
+  if (m) return `${m[1]}${m[2]}U`;
+  // "U07" -> use gender from URL param
+  m = upper.match(/^U(\d{2})$/);
+  if (m) {
+    const prefix = gender === "boys" ? "B" : "G";
+    return `${prefix}${m[1]}U`;
+  }
+  // Already "B07U" / "G12U"
+  return upper;
+}
 
 // Discovery and event fetch return warnings alongside their data so we can
 // surface partial-failure status to the client (banner in the UI).
@@ -133,35 +178,42 @@ interface FetchResult<T> {
 async function discoverFlights(): Promise<FetchResult<Flight[]>> {
   const out: Flight[] = [];
   const warnings: string[] = [];
-  for (const gender of ["girls", "boys"] as const) {
-    try {
-      const html = await fetchUpstream(LIST_URL(gender));
-      const ages: { pos: number; age: string }[] = [];
-      for (const m of html.matchAll(AGE_RE)) {
-        ages.push({ pos: m.index ?? 0, age: m[1].toUpperCase() });
-      }
-      for (const m of html.matchAll(FLIGHT_RE)) {
-        const pos = m.index ?? 0;
-        const guid = m[1].toUpperCase();
-        let age = "?";
-        for (let i = ages.length - 1; i >= 0; i--) {
-          if (ages[i].pos < pos) {
-            age = ages[i].age;
-            break;
-          }
+  for (const tournament of TOURNAMENTS) {
+    for (const gender of ["girls", "boys"] as const) {
+      try {
+        const html = await fetchUpstream(LIST_URL(tournament, gender));
+        const ages: { pos: number; age: string }[] = [];
+        for (const m of html.matchAll(AGE_RE)) {
+          ages.push({ pos: m.index ?? 0, age: normalizeAge(m[1], gender) });
         }
-        out.push({ age, gender, flightGuid: guid });
+        for (const m of html.matchAll(FLIGHT_RE)) {
+          const pos = m.index ?? 0;
+          const guid = m[1].toUpperCase();
+          let age = "?";
+          for (let i = ages.length - 1; i >= 0; i--) {
+            if (ages[i].pos < pos) {
+              age = ages[i].age;
+              break;
+            }
+          }
+          out.push({ age, gender, flightGuid: guid, tournament });
+        }
+      } catch (e) {
+        console.warn(`failed to discover ${tournament.id}/${gender} flights:`, e);
+        warnings.push(
+          `Couldn't load ${tournament.name} ${gender} schedules right now (${(e as Error).message}). Try refreshing in a minute.`,
+        );
       }
-    } catch (e) {
-      console.warn(`failed to discover ${gender} flights:`, e);
-      warnings.push(`Couldn't load ${gender} schedules right now (${(e as Error).message}). Try refreshing in a minute.`);
     }
   }
-  // Deduplicate (same guid appears multiple times on the index page).
+  // Deduplicate (same guid appears multiple times on a single index page).
+  // Scope dedupe by tournament so the same flightGuid in different tournaments
+  // (unlikely but possible) isn't dropped.
   const seen = new Set<string>();
   const unique = out.filter((f) => {
-    if (seen.has(f.flightGuid)) return false;
-    seen.add(f.flightGuid);
+    const key = `${f.tournament.id}:${f.flightGuid}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
   return { data: unique, warnings };
@@ -236,22 +288,122 @@ async function fetchAllEvents(): Promise<FetchResult<Event[]>> {
   const { data: flights, warnings } = await discoverFlights();
   // Track per-age-group failures separately so we can name them in warnings.
   const failed: string[] = [];
-  const all = await Promise.all(
-    flights.map(async (f) => {
-      try {
-        const ics = await fetchUpstream(ICS_URL(f.flightGuid));
-        return parseEvents(ics, f.age, f.gender);
-      } catch (e) {
-        console.warn(`failed ${f.age}/${f.gender}: ${(e as Error).message}`);
-        failed.push(`${f.age} ${f.gender}`);
-        return [] as Event[];
-      }
-    }),
-  );
+  // Avoid hammering upstream with too many concurrent requests on cold starts.
+  // Large fan-out bursts can cause partial first-load data when upstream drops
+  // some flight requests.
+  const CONCURRENCY = 3;
+  const all: Event[][] = [];
+  for (let i = 0; i < flights.length; i += CONCURRENCY) {
+    const batch = flights.slice(i, i + CONCURRENCY);
+    const batchResults = await Promise.all(
+      batch.map(async (f) => {
+        try {
+          const ics = await fetchUpstream(ICS_URL(f.tournament, f.flightGuid));
+          return parseEvents(ics, f.age, f.gender);
+        } catch (e) {
+          console.warn(`failed ${f.tournament.id} ${f.age}/${f.gender}: ${(e as Error).message}`);
+          failed.push(`${f.tournament.id} ${f.age} ${f.gender}`);
+          return [] as Event[];
+        }
+      }),
+    );
+    all.push(...batchResults);
+  }
   if (failed.length) {
     warnings.push(`Couldn't load: ${failed.join(", ")}. Try refreshing in a minute.`);
   }
   return { data: all.flat(), warnings };
+}
+
+interface CachedEvents {
+  updatedAt: number;
+  events: Event[];
+  warnings: string[];
+}
+
+const REFRESH_MAX_ATTEMPTS = 4;
+const REFRESH_RETRY_DELAYS_MS = [500, 1500, 3000];
+
+async function refreshCalendarCache(env: Env, force = false): Promise<CachedEvents> {
+  const existingRaw = await env.CAL_STORE.get(EVENTS_CACHE_KEY);
+  let existing: CachedEvents | null = null;
+  try {
+    existing = existingRaw ? parseCachedEvents(existingRaw) : null;
+  } catch {
+    existing = null;
+  }
+
+  // Retry until we get a clean (no-warnings) snapshot, or exhaust attempts.
+  // Keep the best attempt as a fallback (most events, fewest warnings).
+  let best: { events: Event[]; warnings: string[] } | null = null;
+  for (let attempt = 0; attempt < REFRESH_MAX_ATTEMPTS; attempt++) {
+    const { data: events, warnings } = await fetchAllEvents();
+    if (warnings.length === 0) {
+      best = { events, warnings };
+      break;
+    }
+    if (!best || events.length > best.events.length) {
+      best = { events, warnings };
+    }
+    console.warn(
+      `refresh attempt ${attempt + 1}/${REFRESH_MAX_ATTEMPTS} partial: events=${events.length}, warnings=${warnings.length}`,
+    );
+    const delay = REFRESH_RETRY_DELAYS_MS[attempt];
+    if (delay !== undefined) {
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+
+  const result = best ?? { events: [] as Event[], warnings: ["refresh failed"] };
+
+  // If retries still degraded and we have a known-good existing snapshot,
+  // keep it instead of overwriting with a partial — unless caller forced it.
+  const hasExisting = !!existing && existing.events.length > 0 && existing.warnings.length === 0;
+  if (!force && result.warnings.length > 0 && hasExisting) {
+    console.warn(
+      `keeping last good snapshot: new=${result.events.length}, existing=${existing!.events.length}`,
+    );
+    return existing!;
+  }
+
+  const payload: CachedEvents = {
+    updatedAt: Date.now(),
+    events: result.events,
+    warnings: result.warnings,
+  };
+  await env.CAL_STORE.put(EVENTS_CACHE_KEY, JSON.stringify(payload), {
+    expirationTtl: EVENTS_CACHE_TTL_SECONDS,
+  });
+  return payload;
+}
+
+async function readCachedEvents(env: Env): Promise<CachedEvents> {
+  const raw = await env.CAL_STORE.get(EVENTS_CACHE_KEY);
+  if (!raw) return refreshCalendarCache(env);
+  try {
+    const parsed = parseCachedEvents(raw);
+    // Existing warning payload means the cache was built during a partial
+    // upstream outage. Try to heal it on live reads.
+    if (parsed.warnings.length > 0) {
+      return refreshCalendarCache(env);
+    }
+    return parsed;
+  } catch (e) {
+    console.warn("invalid events cache payload, refreshing:", (e as Error).message);
+    return refreshCalendarCache(env);
+  }
+}
+
+function parseCachedEvents(raw: string): CachedEvents {
+  const parsed = JSON.parse(raw) as CachedEvents;
+  if (
+    typeof parsed.updatedAt !== "number" ||
+    !Array.isArray(parsed.events) ||
+    !Array.isArray(parsed.warnings)
+  ) {
+    throw new Error("invalid cache shape");
+  }
+  return parsed;
 }
 
 // ---------------------------------------------------------------------------
@@ -482,7 +634,7 @@ function textResponse(
 }
 
 export default {
-  async fetch(req: Request): Promise<Response> {
+  async fetch(req: Request, env: Env): Promise<Response> {
     if (req.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
@@ -496,8 +648,49 @@ export default {
         case "/health":
           return new Response("ok\n", { headers: CORS_HEADERS });
 
+        case "/refresh": {
+          const expected = env.REFRESH_TOKEN;
+          if (!expected) {
+            return new Response("refresh disabled: REFRESH_TOKEN not set\n", {
+              status: 503,
+              headers: CORS_HEADERS,
+            });
+          }
+          const provided =
+            req.headers.get("x-refresh-token") ||
+            url.searchParams.get("token") ||
+            "";
+          if (provided !== expected) {
+            return new Response("unauthorized\n", {
+              status: 401,
+              headers: CORS_HEADERS,
+            });
+          }
+          const refreshed = await refreshCalendarCache(env, true);
+          return jsonResponse(
+            {
+              updatedAt: new Date(refreshed.updatedAt).toLocaleString("en-US", {
+                timeZone: "Pacific/Honolulu",
+                weekday: "short",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
+                timeZoneName: "short",
+              }),
+              updatedAtIso: new Date(refreshed.updatedAt).toISOString(),
+              eventCount: refreshed.events.length,
+              warnings: refreshed.warnings,
+            },
+            200,
+            refreshed.warnings.length > 0,
+          );
+        }
+
         case "/teams.json": {
-          const { data: events, warnings } = await fetchAllEvents();
+          const { events, warnings } = await readCachedEvents(env);
           return jsonResponse({
             teams: teamIndex(events),
             warnings,
@@ -506,7 +699,7 @@ export default {
 
         case "/calendar.ics":
         case "/oahu.ics": {
-          const { data: events, warnings } = await fetchAllEvents();
+          const { events, warnings } = await readCachedEvents(env);
           const filtered = filterEvents(events, teams, ages);
           const ics = buildIcs(filtered, calName, teams);
           const headers: Record<string, string> = {
@@ -517,7 +710,7 @@ export default {
         }
 
         case "/preview.json": {
-          const { data: events, warnings } = await fetchAllEvents();
+          const { events, warnings } = await readCachedEvents(env);
           const filtered = filterEvents(events, teams, ages);
           const sel = new Set(teams.map((t) => t.trim().toLowerCase()));
           const rows = filtered
@@ -552,5 +745,8 @@ export default {
         headers: CORS_HEADERS,
       });
     }
+  },
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+    await refreshCalendarCache(env);
   },
 };

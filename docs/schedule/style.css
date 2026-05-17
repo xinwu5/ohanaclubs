@@ -446,6 +446,71 @@ label.team:has(input:checked) {
   label.team:has(input:checked) { background: var(--brand-800); color: var(--brand-100); }
 }
 
+/* ---- Tabs (Club vs Age Group view) ---- */
+.view-tabs {
+  display: flex; gap: 0.4rem;
+  margin-top: 0.7rem;
+  border-bottom: 1px solid var(--border);
+}
+.view-tab {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 0.55rem 0.9rem;
+  font: inherit;
+  font-weight: 500;
+  color: var(--fg-muted);
+  cursor: pointer;
+  border-radius: 0;
+  margin-bottom: -1px;
+}
+.view-tab:hover { color: var(--fg); }
+.view-tab.active {
+  color: var(--brand-700);
+  border-bottom-color: var(--brand-500);
+  font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+  .view-tab.active { color: var(--brand-300); }
+}
+
+/* ---- Gender subsection inside a club ---- */
+.gender-section { margin-top: 0.5rem; }
+.gender-section + .gender-section { margin-top: 0.9rem; }
+.gender-section-label {
+  font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--fg-muted);
+  margin: 0 0 0.25rem 0.3rem;
+}
+.gender-section.boys   .gender-section-label { color: #1d6fa5; }
+.gender-section.girls  .gender-section-label { color: #b8336a; }
+@media (prefers-color-scheme: dark) {
+  .gender-section.boys  .gender-section-label { color: #7ec0ee; }
+  .gender-section.girls .gender-section-label { color: #f5a3c0; }
+}
+
+/* Tint individual team rows by gender (subtle). */
+label.team.boys  { background: rgba(80, 160, 220, 0.07); }
+label.team.girls { background: rgba(220, 100, 150, 0.07); }
+label.team.boys:hover  { background: rgba(80, 160, 220, 0.18); }
+label.team.girls:hover { background: rgba(220, 100, 150, 0.18); }
+label.team.boys:has(input:checked) {
+  background: rgba(80, 160, 220, 0.32);
+  color: var(--fg);
+}
+label.team.girls:has(input:checked) {
+  background: rgba(220, 100, 150, 0.32);
+  color: var(--fg);
+}
+@media (prefers-color-scheme: dark) {
+  label.team.boys  { background: rgba(80, 160, 220, 0.10); }
+  label.team.girls { background: rgba(220, 100, 150, 0.10); }
+  label.team.boys:hover  { background: rgba(80, 160, 220, 0.22); }
+  label.team.girls:hover { background: rgba(220, 100, 150, 0.22); }
+}
+
 /* ---- Footer ---- */
 .site-footer {
   border-top: 1px solid var(--border);
@@ -461,3 +526,76 @@ label.team:has(input:checked) {
 }
 .site-footer p { margin: 0; flex: 1; min-width: 250px; }
 .site-footer button { font-size: 0.85rem; padding: 0.4rem 0.8rem; }
+
+/* ---- Permanent How-to-subscribe expandable ---- */
+.howto {
+  margin: 0 0 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0.8rem 1rem;
+}
+.howto > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex; align-items: center; gap: 0.5rem;
+  font-weight: 600;
+  color: var(--brand-700);
+}
+.howto > summary::-webkit-details-marker { display: none; }
+.howto > summary svg { color: var(--brand-500); }
+.howto > summary::after {
+  content: "▾"; margin-left: auto; color: var(--brand-500); transition: transform 150ms ease;
+}
+.howto[open] > summary::after { content: "▴"; }
+.howto-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed var(--border);
+}
+.howto-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+}
+.howto-card h4 { margin: 0 0 0.4rem; font-size: 0.95rem; }
+.howto-card ol { margin: 0; padding-left: 1.2rem; font-size: 0.88rem; color: var(--fg); }
+.howto-card ol li { margin: 0.2rem 0; line-height: 1.4; }
+.howto-card ol li b { font-weight: 600; }
+.howto-card .howto-note { margin: 0.4rem 0 0; font-size: 0.78rem; color: var(--fg-muted); font-style: italic; }
+
+/* ---- Subscribe toast (iPhone reminder) ---- */
+.subscribe-toast {
+  position: fixed;
+  bottom: 1.2rem; left: 50%;
+  transform: translateX(-50%);
+  max-width: min(420px, calc(100vw - 2rem));
+  background: var(--brand-700);
+  color: #fff;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  display: flex; align-items: flex-start; gap: 0.6rem;
+}
+.subscribe-toast b { color: #fff; }
+.subscribe-toast button {
+  background: transparent; border: 1px solid rgba(255,255,255,0.4);
+  color: #fff; padding: 0.4rem 0.8rem; margin-top: 0.5rem;
+  border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 0.85rem; min-height: auto;
+}
+.subscribe-toast button:hover { background: rgba(255,255,255,0.15); }
+.subscribe-toast .close {
+  position: absolute; top: 0.4rem; right: 0.5rem;
+  background: transparent; border: none; padding: 0.2rem 0.4rem;
+  color: rgba(255,255,255,0.7); margin: 0; min-height: auto;
+  font-size: 1.2rem; line-height: 1;
+}
+.subscribe-toast .close:hover { color: #fff; background: transparent; border: none; }
