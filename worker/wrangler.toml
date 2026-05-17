@@ -9,5 +9,12 @@ routes = [
   { pattern = "api.ohanaclubs.com", custom_domain = true },
 ]
 
+[[kv_namespaces]]
+binding = "CAL_STORE"
+id = "c366da1e4391491785533103b9dae05b"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
 [observability]
 enabled = true

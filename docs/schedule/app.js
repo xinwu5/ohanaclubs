@@ -394,8 +394,142 @@ async function loadTeams() {
   }
 }
 
-function renderTeams(idx) {
-  form.innerHTML = "";
+// Returns true for tournament-bracket placeholders that aren't real
+// subscribable teams (e.g. "Winner SF Game# 602413", "1st A", "WC").
+function isPlaceholder(team) {
+  const s = String(team).trim();
+  if (/^Winner\s+SF\s+Game#/i.test(s)) return true;
+  if (/^(?:\d+(?:st|nd|rd|th)|WC)\b/i.test(s)) return true;
+  return false;
+}
+
+// Extract club name from a team string. Returns "" if no club can be parsed,
+// in which case the caller should bucket the team under "Miscellaneous".
+function parseClub(team) {
+  let s = String(team).trim();
+
+  // Normalize aliases / case variants
+  s = s.replace(/^808FC\b/i, "808 FC");
+  s = s.replace(/^RUSH\b/i, "RUSH");
+  s = s.replace(/^Rush\b/, "RUSH");
+
+  // Normalize separators (hyphens, en/em dashes, underscores) to spaces so
+  // tokens like "-08/07B" and "11G_Gold" split cleanly.
+  s = s.replace(/[\-–—_]/g, " ").replace(/\s+/g, " ").trim();
+
+  // Tokenize and cut at the first token that looks like an age / squad marker.
+  // Skip index 0 so single-number clubs like "808 FC" aren't truncated.
+  const tokens = s.split(" ");
+  const colorWord = /^(?:Boys|Girls|Blue|Red|White|Black|Gold|Green|Yellow|Grey|Gray|Silver|Premier|Academy|Select|East|West|North|South|Elite|Navy|Orange|Maroon|Sky|Royal|Purple|Pink|Aqua|Teal)$/i;
+  const ageToken = /^(?:U\d{1,2}[A-Z]*|[BG]U\d{1,2}[A-Z]*|[BG]\d{1,2}[A-Z]*|\d{1,2}[BG][A-Z]*|\d{4}[BG]|\d{2}\/\d{2}[BG]|\d{1,2}[BG]\/\d{1,2}[BG]|\d{4}\/\d{4}[BG]|OA)$/i;
+
+  let cutIdx = -1;
+  for (let i = 1; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (ageToken.test(t)) { cutIdx = i; break; }
+    if (/^\d{4}$/.test(t)) { cutIdx = i; break; }
+    if (/^\d{2}\/\d{2}$/.test(t)) { cutIdx = i; break; }
+    if (/^\d{1,2}$/.test(t) && i + 1 < tokens.length &&
+        (colorWord.test(tokens[i + 1]) || ageToken.test(tokens[i + 1]) || /^\d/.test(tokens[i + 1]))) {
+      cutIdx = i; break;
+    }
+  }
+  if (cutIdx > 0) s = tokens.slice(0, cutIdx).join(" ");
+
+  return s.trim().replace(/[\s\-]+$/g, "");
+}
+
+// Track the last fetched team index so the view tabs can re-render without refetching.
+let currentTeamIdx = null;
+let currentView = "club"; // "club" | "age"
+
+// Build a flat list of { team, gender, age } objects, filtering placeholders
+// and deduping by team name (a team that appears under multiple ages keeps
+// the first one we saw).
+function flattenTeams(idx) {
+  const seen = new Map(); // team -> {team, gender, age}
+  for (const gender of Object.keys(idx)) {
+    for (const age of Object.keys(idx[gender])) {
+      for (const t of idx[gender][age]) {
+        if (isPlaceholder(t)) continue;
+        if (!seen.has(t)) seen.set(t, { team: t, gender, age });
+      }
+    }
+  }
+  return [...seen.values()];
+}
+
+function teamLabel(entry) {
+  const lbl = document.createElement("label");
+  lbl.className = `team ${entry.gender}`;
+  lbl.dataset.name = entry.team.toLowerCase();
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.value = entry.team;
+  const span = document.createElement("span");
+  span.textContent = entry.team;
+  lbl.appendChild(cb);
+  lbl.appendChild(span);
+  return lbl;
+}
+
+function renderClubView(entries) {
+  // Club -> { display, byGender: { boys: [], girls: [] } }
+  const clubs = new Map();
+  for (const e of entries) {
+    const club = parseClub(e.team) || "Others";
+    const key = club.toLowerCase();
+    if (!clubs.has(key)) {
+      clubs.set(key, { display: club, byGender: { boys: [], girls: [] } });
+    }
+    const bucket = clubs.get(key).byGender;
+    (bucket[e.gender] ??= []).push(e);
+  }
+
+  // Sort clubs alphabetically; always push "Others" to the end.
+  const list = [...clubs.values()].sort((a, b) => {
+    const aOther = a.display === "Others";
+    const bOther = b.display === "Others";
+    if (aOther !== bOther) return aOther ? 1 : -1;
+    return a.display.toLowerCase().localeCompare(b.display.toLowerCase());
+  });
+
+  for (const club of list) {
+    const total =
+      (club.byGender.boys?.length || 0) + (club.byGender.girls?.length || 0);
+    const det = document.createElement("details");
+    det.className = "age-group";
+    det.open = false;
+    const sum = document.createElement("summary");
+    sum.innerHTML = `<span>${escapeHtml(club.display)}</span> <small>${total} team${total === 1 ? "" : "s"}</small>`;
+    det.appendChild(sum);
+
+    // Render each gender that has teams as its own subsection.
+    for (const gender of ["boys", "girls"]) {
+      const list = club.byGender[gender];
+      if (!list || !list.length) continue;
+      const section = document.createElement("div");
+      section.className = `gender-section ${gender}`;
+      const head = document.createElement("div");
+      head.className = "gender-section-label";
+      head.textContent = `${gender} (${list.length})`;
+      section.appendChild(head);
+      const block = document.createElement("div");
+      block.className = "age-block";
+      list
+        .slice()
+        .sort((a, b) => a.team.toLowerCase().localeCompare(b.team.toLowerCase()))
+        .forEach((entry) => block.appendChild(teamLabel(entry)));
+      section.appendChild(block);
+      det.appendChild(section);
+    }
+
+    form.appendChild(det);
+  }
+}
+
+function renderAgeView(idx) {
+  // Original gender > age > teams shape.
   const genders = Object.keys(idx).sort();
   for (const g of genders) {
     const h = document.createElement("h2");
@@ -414,23 +548,52 @@ function renderTeams(idx) {
       const block = document.createElement("div");
       block.className = "age-block";
       for (const t of teams) {
-        const lbl = document.createElement("label");
-        lbl.className = "team";
-        lbl.dataset.name = t.toLowerCase();
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.value = t;
-        const span = document.createElement("span");
-        span.textContent = t;
-        lbl.appendChild(cb);
-        lbl.appendChild(span);
-        block.appendChild(lbl);
+        if (isPlaceholder(t)) continue;
+        block.appendChild(teamLabel({ team: t, gender: g, age }));
       }
       det.appendChild(block);
       form.appendChild(det);
     }
   }
 }
+
+function renderTeams(idx) {
+  currentTeamIdx = idx;
+  form.innerHTML = "";
+  if (currentView === "age") {
+    renderAgeView(idx);
+  } else {
+    renderClubView(flattenTeams(idx));
+  }
+  // Re-apply selections from storage after a re-render (e.g., tab switch).
+  restoreSelectionsFromStorage();
+}
+
+function restoreSelectionsFromStorage() {
+  const stored = teamsFromStorage();
+  if (!stored.length) return;
+  for (const t of stored) {
+    const cb = form.querySelector(`input[value="${CSS.escape(t)}"]`);
+    if (cb) cb.checked = true;
+  }
+}
+
+function setView(view) {
+  if (view === currentView) return;
+  currentView = view;
+  document.querySelectorAll(".view-tab").forEach((btn) => {
+    const active = btn.dataset.view === view;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  });
+  if (currentTeamIdx) renderTeams(currentTeamIdx);
+  // Re-apply current filter (search) after re-render.
+  if (search.value) search.dispatchEvent(new Event("input"));
+}
+
+document.querySelectorAll(".view-tab").forEach((btn) => {
+  btn.addEventListener("click", () => setView(btn.dataset.view));
+});
 
 function restoreSelection() {
   const stored = teamsFromStorage();

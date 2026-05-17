@@ -446,6 +446,71 @@ label.team:has(input:checked) {
   label.team:has(input:checked) { background: var(--brand-800); color: var(--brand-100); }
 }
 
+/* ---- Tabs (Club vs Age Group view) ---- */
+.view-tabs {
+  display: flex; gap: 0.4rem;
+  margin-top: 0.7rem;
+  border-bottom: 1px solid var(--border);
+}
+.view-tab {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 0.55rem 0.9rem;
+  font: inherit;
+  font-weight: 500;
+  color: var(--fg-muted);
+  cursor: pointer;
+  border-radius: 0;
+  margin-bottom: -1px;
+}
+.view-tab:hover { color: var(--fg); }
+.view-tab.active {
+  color: var(--brand-700);
+  border-bottom-color: var(--brand-500);
+  font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+  .view-tab.active { color: var(--brand-300); }
+}
+
+/* ---- Gender subsection inside a club ---- */
+.gender-section { margin-top: 0.5rem; }
+.gender-section + .gender-section { margin-top: 0.9rem; }
+.gender-section-label {
+  font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--fg-muted);
+  margin: 0 0 0.25rem 0.3rem;
+}
+.gender-section.boys   .gender-section-label { color: #1d6fa5; }
+.gender-section.girls  .gender-section-label { color: #b8336a; }
+@media (prefers-color-scheme: dark) {
+  .gender-section.boys  .gender-section-label { color: #7ec0ee; }
+  .gender-section.girls .gender-section-label { color: #f5a3c0; }
+}
+
+/* Tint individual team rows by gender (subtle). */
+label.team.boys  { background: rgba(80, 160, 220, 0.07); }
+label.team.girls { background: rgba(220, 100, 150, 0.07); }
+label.team.boys:hover  { background: rgba(80, 160, 220, 0.18); }
+label.team.girls:hover { background: rgba(220, 100, 150, 0.18); }
+label.team.boys:has(input:checked) {
+  background: rgba(80, 160, 220, 0.32);
+  color: var(--fg);
+}
+label.team.girls:has(input:checked) {
+  background: rgba(220, 100, 150, 0.32);
+  color: var(--fg);
+}
+@media (prefers-color-scheme: dark) {
+  label.team.boys  { background: rgba(80, 160, 220, 0.10); }
+  label.team.girls { background: rgba(220, 100, 150, 0.10); }
+  label.team.boys:hover  { background: rgba(80, 160, 220, 0.22); }
+  label.team.girls:hover { background: rgba(220, 100, 150, 0.22); }
+}
+
 /* ---- Footer ---- */
 .site-footer {
   border-top: 1px solid var(--border);
