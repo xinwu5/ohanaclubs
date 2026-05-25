@@ -563,6 +563,19 @@ function parseDtstart(s: string): Date | null {
   );
 }
 
+function startOfTodayHST(): number {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Pacific/Honolulu",
+    year: "numeric",
+    month: "2-digit",
+    day: "numeric",
+  }).formatToParts(new Date());
+  const y = parts.find((p) => p.type === "year")?.value;
+  const m = parts.find((p) => p.type === "month")?.value;
+  const d = parts.find((p) => p.type === "day")?.value;
+  return new Date(`${y}-${m}-${d}T00:00:00-10:00`).getTime();
+}
+
 function eventPreviewRow(
   e: Event,
   selected: Set<string>,
@@ -574,7 +587,7 @@ function eventPreviewRow(
     else if (l.startsWith("LOCATION:")) loc = l.slice("LOCATION:".length);
   }
   const dt = parseDtstart(dtRaw);
-  if (dt && dt.getTime() < Date.now()) return null;
+  if (dt && dt.getTime() < startOfTodayHST()) return null;
   const info = kitInfo(e, selected);
   return {
     when: dtRaw,

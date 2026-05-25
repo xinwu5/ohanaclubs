@@ -206,6 +206,15 @@ function renderPreview(data) {
       else if (ev.kit === "split")  { kitClass = "kit-split"; kitText = "BOTH"; }
 
       const time = (ev.when_pretty.split(",")[2] || "").trim();
+      const startMs = ev.when_iso ? Date.parse(ev.when_iso) : NaN;
+      const nowMs = Date.now();
+      const GAME_MS = 2 * 60 * 60 * 1000;
+      const isLive = Number.isFinite(startMs) && startMs <= nowMs && nowMs < startMs + GAME_MS;
+      const isPast = Number.isFinite(startMs) && nowMs >= startMs + GAME_MS;
+      const stateClass = isLive ? " game-live" : isPast ? " game-past" : "";
+      const stateTag = isLive
+        ? ' <span class="live-tag">LIVE</span>'
+        : isPast ? ' <span class="past-tag">PAST</span>' : "";
       const ymd = ev.when && ev.when.length >= 8
         ? `${ev.when.slice(0,4)}-${ev.when.slice(4,6)}-${ev.when.slice(6,8)}`
         : "";
@@ -216,8 +225,8 @@ function renderPreview(data) {
         : "/map/";
 
       parts.push(`
-        <article class="game">
-          <div class="game-time">${escapeHtml(time || ev.when_pretty)}</div>
+        <article class="game${stateClass}">
+          <div class="game-time">${escapeHtml(time || ev.when_pretty)}${stateTag}</div>
           <div class="game-body">
             <div class="game-teams">
               <b>${escapeHtml(ev.teams[0])}</b>

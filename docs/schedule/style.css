@@ -234,6 +234,40 @@ input[type=search]:focus { outline: 2px solid var(--brand-300); outline-offset: 
   transition: transform 120ms ease, box-shadow 120ms ease;
 }
 .game:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.game-past { opacity: 0.62; }
+.game-past .game-teams b { text-decoration: line-through; text-decoration-thickness: 1px; }
+.game-live { box-shadow: 0 0 0 2px #16a34a55, var(--shadow-sm); }
+.live-tag {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: #16a34a;
+  color: #fff;
+  font-family: var(--font-sans, inherit);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.past-tag {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: var(--border);
+  color: var(--text-muted, #666);
+  font-family: var(--font-sans, inherit);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
 .game-time {
   font-family: var(--font-display);
   font-weight: 700;
